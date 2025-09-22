@@ -24,6 +24,7 @@ import (
 
 	"github.com/bufbuild/protoplugin"
 	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema"
+	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
@@ -126,6 +127,13 @@ func parseOptions(param string) ([][]jsonschema.GeneratorOption, error) {
 				for _, target := range targetsList {
 					targets[strings.ToLower(strings.TrimSpace(target))] = struct{}{}
 				}
+			case "config":
+				// Load extensions configuration from YAML file
+				registry, err := extensions.LoadRegistry(value)
+				if err != nil {
+					return nil, fmt.Errorf("failed to load extensions config from %q: %w", value, err)
+				}
+				baseOpts = append(baseOpts, jsonschema.WithExtensions(registry))
 			default:
 				return nil, fmt.Errorf("unknown parameter %q", param)
 			}

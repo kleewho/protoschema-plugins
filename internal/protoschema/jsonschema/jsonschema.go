@@ -262,6 +262,16 @@ func (p *Generator) generate(desc protoreflect.MessageDescriptor) (*msgSchema, e
 				schema: overrideSchema, // Use override instead of generating
 				id:     p.getID(desc, false),
 			}
+			// Automatically add $schema if not present
+			if _, exists := entry.schema["$schema"]; !exists {
+				entry.schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+			}
+			// Automatically add $id if not present (unless in bundle mode)
+			if !p.bundle {
+				if _, exists := entry.schema["$id"]; !exists {
+					entry.schema["$id"] = entry.id
+				}
+			}
 			p.schema[desc.FullName()] = entry
 			return entry, nil
 		}
