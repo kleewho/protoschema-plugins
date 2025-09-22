@@ -24,18 +24,22 @@ import (
 
 // Registry holds loaded extensions and provides lookup methods
 type Registry struct {
-	config          *Config
-	schemaOverrides map[string]*SchemaOverride
+	config           *Config
+	schemaOverrides  map[string]*SchemaOverride
 	optionProcessors []OptionProcessor
-	resolver        *ReferenceResolver
+	resolver         *ReferenceResolver
+	processorMatcher *ProcessorMatcher
+	schemaProcessor  *SchemaProcessor
 }
 
 // NewRegistry creates a new extension registry
 func NewRegistry(config *Config) (*Registry, error) {
 	registry := &Registry{
-		config:          config,
-		schemaOverrides: make(map[string]*SchemaOverride),
+		config:           config,
+		schemaOverrides:  make(map[string]*SchemaOverride),
 		optionProcessors: config.OptionProcessors,
+		processorMatcher: NewProcessorMatcher(),
+		schemaProcessor:  NewSchemaProcessor(),
 	}
 
 	// Copy schema overrides for faster lookup
@@ -85,43 +89,9 @@ func (r *Registry) GetSchemaOverride(fqn string) map[string]any {
 }
 
 // GetOptionProcessors returns option processors that match the given field
-func (r *Registry) GetOptionProcessors(field protoreflect.FieldDescriptor) []OptionProcessor {
-	var matches []OptionProcessor
-
-	// For MVP, simplified matching based on field options
-	for _, processor := range r.optionProcessors {
-		if r.matchesField(processor, field) {
-			matches = append(matches, processor)
-		}
-	}
-
-	return matches
-}
-
-// matchesField checks if an option processor matches a field (simplified for MVP)
-func (r *Registry) matchesField(processor OptionProcessor, field protoreflect.FieldDescriptor) bool {
-	// For MVP: simplified exact matching
-	// This is a placeholder implementation - actual implementation will depend on
-	// how protobuf options are accessed and structured.
-	// For now, we'll return false to avoid errors, but this will be implemented
-	// when we have actual protobuf option parsing.
-
-	// TODO: Implement actual option matching based on protobuf field options
-	// This would involve:
-	// 1. Extracting options from the field descriptor
-	// 2. Matching the option path (e.g., "validator.field.required")
-	// 3. Comparing the option value with the expected value
-
-	// Example structure (to be implemented):
-	// optionPath := processor.Match.Option
-	// expectedValue := processor.Match.Value
-	//
-	// Extract option value from field based on optionPath
-	// actualValue := extractOptionValue(field, optionPath)
-	//
-	// return compareValues(expectedValue, actualValue)
-
-	return false
+func (r *Registry) GetOptionProcessors(field protoreflect.FieldDescriptor) ([]OptionProcessor, error) {
+	// Use the new ProcessorMatcher to find matching processors
+	return r.processorMatcher.FindMatchingProcessors(field, r.optionProcessors)
 }
 
 // copySchema creates a deep copy of a schema map
@@ -163,16 +133,25 @@ func copyValue(value any) any {
 
 // ApplyOptionProcessors applies all matching option processors to a field schema
 func (r *Registry) ApplyOptionProcessors(field protoreflect.FieldDescriptor, schema map[string]any) error {
-	processors := r.GetOptionProcessors(field)
-
-	for _, processor := range processors {
-		// Merge processor schema with field schema
-		if err := mergeSchemas(schema, processor.Schema); err != nil {
-			return fmt.Errorf("failed to apply processor %s: %w", processor.Name, err)
-		}
+	// Get matching processors
+	processors, err := r.GetOptionProcessors(field)
+	if err != nil {
+		return fmt.Errorf("failed to get option processors: %w", err)
 	}
 
-	return nil
+	// Extract field options for template processing
+	fieldOptions, err := r.processorMatcher.extractor.ExtractOptions(field)
+	if err != nil {
+		return fmt.Errorf("failed to extract field options: %w", err)
+	}
+
+	// Apply processors using the new SchemaProcessor
+	return r.schemaProcessor.ApplyProcessors(schema, processors, fieldOptions)
+}
+
+// ProcessField is a convenience method that combines option processing
+func (r *Registry) ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) error {
+	return r.ApplyOptionProcessors(field, schema)
 }
 
 // mergeSchemas merges source schema into target schema

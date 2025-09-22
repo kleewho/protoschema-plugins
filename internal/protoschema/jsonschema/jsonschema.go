@@ -124,6 +124,8 @@ type Generator struct {
 type ExtensionRegistry interface {
 	GetSchemaOverride(fqn string) map[string]any
 	HasOverrides() bool
+	HasOptionProcessors() bool
+	ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) error
 }
 
 // NewGenerator creates a new JSON schema generator with the given options.
@@ -403,6 +405,14 @@ func (p *Generator) generateField(entry *msgSchema, field protoreflect.FieldDesc
 	if err := p.generateFieldValidation(entry, field, false, rules, schema); err != nil {
 		return nil, err
 	}
+
+	// Apply option processors if extensions are available
+	if p.extensions != nil && p.extensions.HasOptionProcessors() {
+		if err := p.extensions.ProcessField(field, schema); err != nil {
+			return nil, fmt.Errorf("failed to process field %s with option processors: %w", field.Name(), err)
+		}
+	}
+
 	return schema, nil
 }
 

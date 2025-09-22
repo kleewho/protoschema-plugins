@@ -210,6 +210,133 @@ func TestGenerator_WithExtensions_NoOverride(t *testing.T) {
 	assert.Equal(t, "No Override", testSchema["title"]) // Default title generation (camelCase -> space separated)
 }
 
+func TestGenerator_WithExtensions_OptionProcessors(t *testing.T) {
+	// Create test configuration with option processors
+	config := &extensions.Config{
+		Version: "1.0",
+		SchemaOverrides: map[string]extensions.SchemaOverride{},
+		OptionProcessors: []extensions.OptionProcessor{
+			{
+				Name:     "required_fields",
+				Priority: 100,
+				Match: extensions.OptionMatch{
+					Option: "validator.field.required",
+					Value:  true,
+				},
+				Schema: map[string]any{
+					"x-required": true,
+				},
+			},
+			{
+				Name:     "pattern_validation",
+				Priority: 90,
+				Match: extensions.OptionMatch{
+					Option: "validator.field.pattern",
+					Value:  "*", // Match any pattern value
+				},
+				Schema: map[string]any{
+					"x-custom-pattern": "${option.pattern}",
+				},
+			},
+			{
+				Name:     "string_length",
+				Priority: 80,
+				Match: extensions.OptionMatch{
+					Option: "validator.field.min_length",
+					Value:  "*", // Match any min_length value
+				},
+				Schema: map[string]any{
+					"x-min-length": "${option.min_length}",
+				},
+			},
+		},
+	}
+
+	// Create registry
+	registry, err := extensions.NewRegistry(config)
+	require.NoError(t, err)
+
+	// Create generator with extensions
+	generator := NewGenerator(WithExtensions(registry))
+
+	// Create a mock message descriptor with fields that would have validator options
+	// Note: Since we're using mock descriptors without actual validator options,
+	// we need to test the infrastructure more than the actual option extraction
+	testDesc := createMockMessageDescriptor(t, "test.User")
+
+	// Generate schema
+	err = generator.Add(testDesc)
+	require.NoError(t, err)
+
+	schemas := generator.Generate()
+
+	// Verify that the message schema was generated
+	testSchema, exists := schemas["test.User"]
+	require.True(t, exists)
+	assert.Equal(t, "object", testSchema["type"])
+
+	// Since our mock descriptors don't have actual validator options,
+	// the option processors won't be applied. But we can verify the system
+	// integrates correctly by checking that no errors occurred.
+	// In a real scenario with actual protobuf files containing validator options,
+	// the processors would be applied.
+}
+
+func TestGenerator_WithExtensions_PriorityProcessing(t *testing.T) {
+	// Test that processors are applied in priority order
+	config := &extensions.Config{
+		Version: "1.0",
+		SchemaOverrides: map[string]extensions.SchemaOverride{},
+		OptionProcessors: []extensions.OptionProcessor{
+			{
+				Name:     "low_priority",
+				Priority: 50,
+				Match: extensions.OptionMatch{
+					Option: "validator.field.required",
+					Value:  true,
+				},
+				Schema: map[string]any{
+					"x-priority": "low",
+				},
+			},
+			{
+				Name:     "high_priority",
+				Priority: 100,
+				Match: extensions.OptionMatch{
+					Option: "validator.field.required",
+					Value:  true,
+				},
+				Schema: map[string]any{
+					"x-priority": "high",
+				},
+			},
+		},
+	}
+
+	// Create registry and verify processors are sorted by priority
+	registry, err := extensions.NewRegistry(config)
+	require.NoError(t, err)
+
+	processorNames := registry.GetProcessorNames()
+	require.Len(t, processorNames, 2)
+	// High priority should come first
+	assert.Equal(t, "high_priority", processorNames[0])
+	assert.Equal(t, "low_priority", processorNames[1])
+
+	// Create generator with extensions
+	generator := NewGenerator(WithExtensions(registry))
+
+	// Test that the system integrates without errors
+	testDesc := createMockMessageDescriptor(t, "test.PriorityTest")
+	err = generator.Add(testDesc)
+	require.NoError(t, err)
+
+	schemas := generator.Generate()
+	testSchema, exists := schemas["test.PriorityTest"]
+	require.True(t, exists)
+	assert.Equal(t, "object", testSchema["type"])
+}
+
 // Helper function to create a mock Timestamp descriptor
 func createMockTimestampDescriptor(t *testing.T) protoreflect.MessageDescriptor {
 	// Create a minimal descriptor for google.protobuf.Timestamp
