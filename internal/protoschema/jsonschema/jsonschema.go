@@ -115,7 +115,6 @@ type Generator struct {
 	schema               map[protoreflect.FullName]*msgSchema
 	custom               map[protoreflect.FullName]func(protoreflect.MessageDescriptor, *validate.FieldRules, map[string]any) error
 	extensions           ExtensionRegistry
-	fileDescriptors      []protoreflect.FileDescriptor // All file descriptors for cross-file reference resolution
 	useJSONNames         bool
 	additionalProperties bool
 	strict               bool
@@ -142,9 +141,9 @@ func NewGenerator(opts ...GeneratorOption) *Generator {
 	return result
 }
 
-// Add adds a message descriptor to the generator.
-func (p *Generator) Add(desc protoreflect.MessageDescriptor) error {
-	schema, err := p.generate(desc)
+// Add adds a message descriptor to the generator with its associated file descriptor.
+func (p *Generator) Add(desc protoreflect.MessageDescriptor, fileDesc protoreflect.FileDescriptor) error {
+	schema, err := p.generate(desc, fileDesc)
 	if err != nil {
 		return fmt.Errorf("failed to generate schema for %q: %w", desc.FullName(), err)
 	}
@@ -152,26 +151,30 @@ func (p *Generator) Add(desc protoreflect.MessageDescriptor) error {
 	return nil
 }
 
-// SetFileDescriptors sets all file descriptors available for cross-file reference resolution
-func (p *Generator) SetFileDescriptors(fileDescriptors []protoreflect.FileDescriptor) {
-	p.fileDescriptors = fileDescriptors
-}
-
-// findMessageDescriptor searches for a MessageDescriptor by FullName across all file descriptors
-func (p *Generator) findMessageDescriptor(fullName protoreflect.FullName) protoreflect.MessageDescriptor {
-	for _, fileDesc := range p.fileDescriptors {
-		messages := fileDesc.Messages()
-		for i := 0; i < messages.Len(); i++ {
-			msgDesc := messages.Get(i)
-			if msgDesc.FullName() == fullName {
-				return msgDesc
-			}
-			// Also check nested messages
-			if nestedMsg := p.findNestedMessage(msgDesc, fullName); nestedMsg != nil {
-				return nestedMsg
-			}
+// findMessageDescriptorInImports searches for a MessageDescriptor by FullName through the file descriptor's import chain
+func (p *Generator) findMessageDescriptorInImports(fileDesc protoreflect.FileDescriptor, fullName protoreflect.FullName) protoreflect.MessageDescriptor {
+	// First check messages in the current file
+	messages := fileDesc.Messages()
+	for i := 0; i < messages.Len(); i++ {
+		msgDesc := messages.Get(i)
+		if msgDesc.FullName() == fullName {
+			return msgDesc
+		}
+		// Also check nested messages
+		if nestedMsg := p.findNestedMessage(msgDesc, fullName); nestedMsg != nil {
+			return nestedMsg
 		}
 	}
+
+	// Then check imported files recursively
+	imports := fileDesc.Imports()
+	for i := 0; i < imports.Len(); i++ {
+		importedFile := imports.Get(i)
+		if foundMsg := p.findMessageDescriptorInImports(importedFile, fullName); foundMsg != nil {
+			return foundMsg
+		}
+	}
+
 	return nil
 }
 
@@ -217,7 +220,7 @@ func (p *Generator) bundleSchema(entry *msgSchema) map[string]any {
 	defs[strings.TrimPrefix(entry.id, defsPrefix)] = entry.schema
 	// Collect all referenced schemas.
 	for ref := range entry.refs {
-		p.bundleReferences(ref, defs)
+		p.bundleReferences(ref, entry.fileDesc, defs)
 	}
 	return map[string]any{
 		"$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -228,17 +231,17 @@ func (p *Generator) bundleSchema(entry *msgSchema) map[string]any {
 }
 
 // bundleReferences recursively collects all referenced schemas and adds them to the defs map.
-func (p *Generator) bundleReferences(name protoreflect.FullName, defs map[string]any) {
+func (p *Generator) bundleReferences(name protoreflect.FullName, sourceFileDesc protoreflect.FileDescriptor, defs map[string]any) {
 	entry, ok := p.schema[name]
 	if !ok {
-		// Try to find the message descriptor and generate schema on-demand
-		msgDesc := p.findMessageDescriptor(name)
+		// Try to find the message descriptor through the import chain
+		msgDesc := p.findMessageDescriptorInImports(sourceFileDesc, name)
 		if msgDesc == nil {
-			return // Message descriptor not found in available file descriptors
+			return // Message descriptor not found in import chain
 		}
 
 		// Generate schema for the external message
-		generatedSchema, err := p.generate(msgDesc)
+		generatedSchema, err := p.generate(msgDesc, sourceFileDesc)
 		if err != nil {
 			return // Failed to generate schema
 		}
@@ -256,18 +259,19 @@ func (p *Generator) bundleReferences(name protoreflect.FullName, defs map[string
 
 	// Add transitive references.
 	for ref := range entry.refs {
-		p.bundleReferences(ref, defs)
+		p.bundleReferences(ref, entry.fileDesc, defs)
 	}
 }
 
 // msgSchema is the internal representation of a protobuf message's schema.
 type msgSchema struct {
 	// id is the unique identifier in the JSON schema for this message.
-	id     string
-	desc   protoreflect.MessageDescriptor
-	schema map[string]any
+	id       string
+	desc     protoreflect.MessageDescriptor
+	fileDesc protoreflect.FileDescriptor
+	schema   map[string]any
 	// refs is a map of all referenced message schemas.
-	refs map[protoreflect.FullName]struct{}
+	refs  map[protoreflect.FullName]struct{}
 	// added is true if this schema was explicitly added and false if it is a dependency.
 	added bool
 }
@@ -303,7 +307,7 @@ func (p *Generator) getRef(fdesc protoreflect.FieldDescriptor) string {
 }
 
 // generate is the entry point for (recursively) generating the schema for a message descriptor.
-func (p *Generator) generate(desc protoreflect.MessageDescriptor) (*msgSchema, error) {
+func (p *Generator) generate(desc protoreflect.MessageDescriptor, fileDesc protoreflect.FileDescriptor) (*msgSchema, error) {
 	if entry, ok := p.schema[desc.FullName()]; ok {
 		return entry, nil // Already generated.
 	}
@@ -312,9 +316,10 @@ func (p *Generator) generate(desc protoreflect.MessageDescriptor) (*msgSchema, e
 	if p.extensions != nil {
 		if overrideSchema := p.extensions.GetSchemaOverride(string(desc.FullName())); overrideSchema != nil {
 			entry := &msgSchema{
-				desc:   desc,
-				schema: overrideSchema, // Use override instead of generating
-				id:     p.getID(desc, false),
+				desc:     desc,
+				fileDesc: fileDesc,
+				schema:   overrideSchema, // Use override instead of generating
+				id:       p.getID(desc, false),
 			}
 			// Automatically add $schema if not present
 			if _, exists := entry.schema["$schema"]; !exists {
@@ -333,9 +338,10 @@ func (p *Generator) generate(desc protoreflect.MessageDescriptor) (*msgSchema, e
 
 	// Create a new entry for the message.
 	entry := &msgSchema{
-		desc:   desc,
-		schema: make(map[string]any),
-		id:     p.getID(desc, false),
+		desc:     desc,
+		fileDesc: fileDesc,
+		schema:   make(map[string]any),
+		id:       p.getID(desc, false),
 	}
 	entry.schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
 	if !p.bundle {
@@ -1547,7 +1553,7 @@ func (p *Generator) generateMessageValidation(entry *msgSchema, field protorefle
 	}
 	schema["$ref"] = p.getRef(field)
 	// Ensure the schema for the message type is generated.
-	_, err := p.generate(field.Message())
+	_, err := p.generate(field.Message(), entry.fileDesc)
 	return err
 }
 

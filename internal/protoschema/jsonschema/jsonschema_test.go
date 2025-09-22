@@ -37,7 +37,7 @@ func TestJSONSchemaGolden(t *testing.T) {
 	require.NoError(t, err)
 	generator := NewGenerator()
 	for _, testDesc := range testDescs {
-		err = generator.Add(testDesc)
+		err = generator.Add(testDesc, testDesc.ParentFile())
 		require.NoError(t, err)
 	}
 
@@ -202,7 +202,7 @@ func TestCrossFileAnyConstraints(t *testing.T) {
 	generator := NewGenerator(WithBundle())
 
 	for _, testDesc := range testDescs {
-		err = generator.Add(testDesc)
+		err = generator.Add(testDesc, testDesc.ParentFile())
 		require.NoError(t, err)
 	}
 
@@ -300,27 +300,12 @@ func TestCrossFileAnyConstraints(t *testing.T) {
 func TestCrossFileAnyConstraints_Realistic(t *testing.T) {
 	t.Parallel()
 
-	// Load all test descriptors to simulate having all FileDescriptors available
+	// Load test descriptors
 	testDescs, err := golden.GetTestDescriptors("../../testdata")
 	require.NoError(t, err)
 
-	// Build a map of all descriptors by FullName for easy lookup
-	allDescs := make(map[protoreflect.FullName]protoreflect.MessageDescriptor)
-	var allFiles []protoreflect.FileDescriptor
-	fileSet := make(map[string]protoreflect.FileDescriptor)
-
-	for _, desc := range testDescs {
-		allDescs[desc.FullName()] = desc
-		// Collect unique file descriptors
-		if _, exists := fileSet[desc.ParentFile().Path()]; !exists {
-			fileSet[desc.ParentFile().Path()] = desc.ParentFile()
-			allFiles = append(allFiles, desc.ParentFile())
-		}
-	}
-
 	// Create generator in bundle mode
 	generator := NewGenerator(WithBundle())
-	generator.SetFileDescriptors(allFiles) // Provide all file descriptors for cross-file resolution
 
 	// Simulate real-world scenario: only add the main CrossFileEventEnvelope message
 	// (like how protoc would process only one file at a time)
@@ -334,7 +319,7 @@ func TestCrossFileAnyConstraints_Realistic(t *testing.T) {
 	require.NotNil(t, crossFileDesc, "CrossFileEventEnvelope descriptor not found")
 
 	// Add only the main message (not the external references)
-	err = generator.Add(crossFileDesc)
+	err = generator.Add(crossFileDesc, crossFileDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()

@@ -152,7 +152,7 @@ func TestGenerator_WithExtensions_RealValidatorOptions(t *testing.T) {
 	constraintTestDesc := (&testv1.ConstraintTest{}).ProtoReflect().Descriptor()
 
 	// Generate schema
-	err = generator.Add(constraintTestDesc)
+	err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -298,7 +298,7 @@ func TestGenerator_WithExtensions_RequiredFields(t *testing.T) {
 	constraintTestDesc := (&testv1.ConstraintTest{}).ProtoReflect().Descriptor()
 
 	// Generate schema
-	err = generator.Add(constraintTestDesc)
+	err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -371,7 +371,7 @@ func TestGenerator_WithExtensions_NestedMessages(t *testing.T) {
 	constraintTestDesc := (&testv1.ConstraintTest{}).ProtoReflect().Descriptor()
 
 	// Generate schema
-	err = generator.Add(constraintTestDesc)
+	err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -439,7 +439,7 @@ func TestGenerator_WithExtensions_PerformanceWithRealData(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		generator := NewGenerator(WithExtensions(registry))
-		err = generator.Add(constraintTestDesc)
+		err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 		require.NoError(t, err)
 
 		schemas := generator.Generate()
@@ -498,7 +498,7 @@ option_processors:
 
 	// Generate schema for ConstraintTest
 	constraintTestDesc := (&testv1.ConstraintTest{}).ProtoReflect().Descriptor()
-	err = generator.Add(constraintTestDesc)
+	err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -568,7 +568,7 @@ func TestGenerator_WithExtensions_ComplexValidation(t *testing.T) {
 	generator := NewGenerator(WithExtensions(registry))
 	constraintTestDesc := (&testv1.ConstraintTest{}).ProtoReflect().Descriptor()
 
-	err = generator.Add(constraintTestDesc)
+	err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -618,7 +618,7 @@ func TestGenerator_WithExtensions_AllFieldTypes(t *testing.T) {
 	require.NoError(t, err)
 
 	generator := NewGenerator(WithExtensions(registry))
-	err = generator.Add(constraintTestDesc)
+	err = generator.Add(constraintTestDesc, constraintTestDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()

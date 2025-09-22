@@ -56,7 +56,7 @@ func TestGenerator_WithExtensions_SchemaOverride(t *testing.T) {
 	timestampDesc := createMockTimestampDescriptor(t)
 
 	// Generate schema
-	err = generator.Add(timestampDesc)
+	err = generator.Add(timestampDesc, timestampDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -79,7 +79,7 @@ func TestGenerator_WithoutExtensions_DefaultBehavior(t *testing.T) {
 	timestampDesc := createMockTimestampDescriptor(t)
 
 	// Generate schema
-	err := generator.Add(timestampDesc)
+	err := generator.Add(timestampDesc, timestampDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -150,9 +150,9 @@ func TestGenerator_WithExtensions_MultipleOverrides(t *testing.T) {
 	userDesc := createMockMessageDescriptor(t, "test.User")
 
 	// Generate schemas
-	err = generator.Add(moneyDesc)
+	err = generator.Add(moneyDesc, moneyDesc.ParentFile())
 	require.NoError(t, err)
-	err = generator.Add(userDesc)
+	err = generator.Add(userDesc, userDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -196,7 +196,7 @@ func TestGenerator_WithExtensions_NoOverride(t *testing.T) {
 	testDesc := createMockMessageDescriptor(t, "test.NoOverride")
 
 	// Generate schema
-	err = generator.Add(testDesc)
+	err = generator.Add(testDesc, testDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -265,7 +265,7 @@ func TestGenerator_WithExtensions_OptionProcessors(t *testing.T) {
 	testDesc := createMockMessageDescriptor(t, "test.User")
 
 	// Generate schema
-	err = generator.Add(testDesc)
+	err = generator.Add(testDesc, testDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -328,7 +328,7 @@ func TestGenerator_WithExtensions_PriorityProcessing(t *testing.T) {
 
 	// Test that the system integrates without errors
 	testDesc := createMockMessageDescriptor(t, "test.PriorityTest")
-	err = generator.Add(testDesc)
+	err = generator.Add(testDesc, testDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
@@ -368,7 +368,7 @@ func TestGenerator_WithExtensions_RequiredFieldProcessing(t *testing.T) {
 	// testing that x-required is properly handled
 	testDesc := createMockMessageDescriptor(t, "test.RequiredFieldTest")
 
-	err = generator.Add(testDesc)
+	err = generator.Add(testDesc, testDesc.ParentFile())
 	require.NoError(t, err)
 
 	schemas := generator.Generate()

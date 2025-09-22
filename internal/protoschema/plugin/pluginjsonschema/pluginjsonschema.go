@@ -41,12 +41,6 @@ func Handle(
 		return err
 	}
 
-	// Get all files for cross-file reference resolution
-	allFiles, err := request.AllFiles()
-	if err != nil {
-		return err
-	}
-
 	// Parse the parameters from the request.
 	opts, err := parseOptions(request.Parameter())
 	if err != nil {
@@ -55,17 +49,7 @@ func Handle(
 
 	gens := make([]*jsonschema.Generator, len(opts))
 	for i, opt := range opts {
-		gen := jsonschema.NewGenerator(opt...)
-
-		// Provide all file descriptors for cross-file reference resolution
-		var allFileDescriptors []protoreflect.FileDescriptor
-		allFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
-			allFileDescriptors = append(allFileDescriptors, fd)
-			return true
-		})
-		gen.SetFileDescriptors(allFileDescriptors)
-
-		gens[i] = gen
+		gens[i] = jsonschema.NewGenerator(opt...)
 	}
 
 	// Generate the JSON schema for each message descriptor.
@@ -73,7 +57,7 @@ func Handle(
 		for i := range fileDescriptor.Messages().Len() {
 			messageDescriptor := fileDescriptor.Messages().Get(i)
 			for _, gen := range gens {
-				if err := gen.Add(messageDescriptor); err != nil {
+				if err := gen.Add(messageDescriptor, fileDescriptor); err != nil {
 					return err
 				}
 			}
