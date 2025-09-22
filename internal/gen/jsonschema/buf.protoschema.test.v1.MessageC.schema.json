@@ -1,0 +1,38 @@
+{
+  "$id": "buf.protoschema.test.v1.MessageC.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "patternProperties": {
+    "^(fieldC)$": {
+      "default": "",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "field_c": {
+      "default": "",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "enum": [
+            "Infinity",
+            "-Infinity",
+            "NaN"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "title": "MessageC",
+  "type": "object"
+}

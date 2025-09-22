@@ -197,3 +197,4 @@ func parseBoolean(value string) (bool, error) {
 		return false, fmt.Errorf("invalid boolean value %q, expected true or false", value)
 	}
 }
+

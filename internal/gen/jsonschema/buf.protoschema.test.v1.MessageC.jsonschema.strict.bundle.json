@@ -1,0 +1,37 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.MessageC.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "fieldC": {
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "fieldC",
+        "value"
+      ],
+      "title": "MessageC",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.MessageC.jsonschema.strict.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.MessageC.jsonschema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

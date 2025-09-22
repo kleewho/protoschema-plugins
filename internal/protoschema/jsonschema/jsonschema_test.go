@@ -21,8 +21,10 @@ import (
 	"strings"
 	"testing"
 
+	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"github.com/bufbuild/protoschema-plugins/internal/protoschema/golden"
 	"github.com/santhosh-tekuri/jsonschema/v6"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
@@ -104,4 +106,86 @@ func assertValidation(t *testing.T, schema *jsonschema.Schema, jsonData map[stri
 	expectedStr := string(expectedData)
 	expectedStr = strings.TrimSpace(expectedStr)
 	require.Equal(t, expectedStr, errStr, errStr)
+}
+
+func TestParseTypeUrl(t *testing.T) {
+	t.Parallel()
+	generator := NewGenerator()
+
+	tests := []struct {
+		name     string
+		typeUrl  string
+		expected string
+	}{
+		{
+			name:     "standard googleapis format",
+			typeUrl:  "type.googleapis.com/example.v1.Message",
+			expected: "example.v1.Message",
+		},
+		{
+			name:     "buf build format",
+			typeUrl:  "type.buf.build/example.v1.Message",
+			expected: "example.v1.Message",
+		},
+		{
+			name:     "simple FQN",
+			typeUrl:  "example.v1.Message",
+			expected: "example.v1.Message",
+		},
+		{
+			name:     "path format",
+			typeUrl:  "path/to/proto/example.v1.Message",
+			expected: "example.v1.Message",
+		},
+		{
+			name:     "deep path format",
+			typeUrl:  "very/deep/path/to/proto/files/example.v1.Message",
+			expected: "example.v1.Message",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := generator.parseTypeUrl(tt.typeUrl)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestGenerateConstrainedAnyValidation_NoConstraints(t *testing.T) {
+	t.Parallel()
+	generator := NewGenerator()
+	schema := make(map[string]any)
+
+	// Test with nil rules
+	err := generator.generateConstrainedAnyValidation(nil, schema)
+	require.NoError(t, err)
+
+	// Should fall back to default Any behavior
+	assert.Equal(t, jsObject, schema["type"])
+	properties, ok := schema["properties"].(map[string]any)
+	require.True(t, ok)
+	typeProperty, ok := properties["@type"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "string", typeProperty["type"])
+}
+
+func TestGenerateConstrainedAnyValidation_EmptyConstraints(t *testing.T) {
+	t.Parallel()
+	generator := NewGenerator()
+	schema := make(map[string]any)
+
+	// Create field rules with nil any rules (simulates no constraints)
+	rules := &validate.FieldRules{}
+
+	err := generator.generateConstrainedAnyValidation(rules, schema)
+	require.NoError(t, err)
+
+	// Should fall back to default Any behavior
+	assert.Equal(t, jsObject, schema["type"])
+	properties, ok := schema["properties"].(map[string]any)
+	require.True(t, ok)
+	typeProperty, ok := properties["@type"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "string", typeProperty["type"])
 }

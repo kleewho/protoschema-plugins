@@ -1,0 +1,32 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.EventEnvelope.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Test message for single Any field with constraints",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.MessageA.jsonschema.strict"
+            },
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.MessageB.jsonschema.strict"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Event Envelope",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.EventEnvelope.jsonschema.strict.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.EventEnvelope.jsonschema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

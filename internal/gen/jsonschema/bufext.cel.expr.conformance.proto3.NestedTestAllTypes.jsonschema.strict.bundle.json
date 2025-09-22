@@ -38,11 +38,16 @@
       "description": "This proto includes every type of field in both singular and repeated\n forms.",
       "properties": {
         "listValue": {
-          "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+          "type": "array"
         },
         "mapBoolAny": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "propertyNames": {
             "type": "boolean"
@@ -60,7 +65,8 @@
         },
         "mapBoolBoolWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "propertyNames": {
             "type": "boolean"
@@ -79,7 +85,9 @@
         },
         "mapBoolBytesWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "propertyNames": {
             "type": "boolean"
@@ -109,7 +117,20 @@
         },
         "mapBoolDoubleWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "propertyNames": {
             "type": "boolean"
@@ -118,7 +139,8 @@
         },
         "mapBoolDuration": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "propertyNames": {
             "type": "boolean"
@@ -165,7 +187,22 @@
         },
         "mapBoolFloatWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "propertyNames": {
             "type": "boolean"
@@ -185,7 +222,10 @@
         },
         "mapBoolInt32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "boolean"
@@ -203,7 +243,8 @@
         },
         "mapBoolInt64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "propertyNames": {
             "type": "boolean"
@@ -212,7 +253,7 @@
         },
         "mapBoolListValue": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "propertyNames": {
             "type": "boolean"
@@ -252,7 +293,8 @@
         },
         "mapBoolStringWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "propertyNames": {
             "type": "boolean"
@@ -261,7 +303,7 @@
         },
         "mapBoolStruct": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "propertyNames": {
             "type": "boolean"
@@ -270,7 +312,8 @@
         },
         "mapBoolTimestamp": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "propertyNames": {
             "type": "boolean"
@@ -290,7 +333,10 @@
         },
         "mapBoolUint32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "boolean"
@@ -309,7 +355,9 @@
         },
         "mapBoolUint64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "boolean"
@@ -317,9 +365,7 @@
           "type": "object"
         },
         "mapBoolValue": {
-          "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "additionalProperties": {},
           "propertyNames": {
             "type": "boolean"
           },
@@ -327,7 +373,12 @@
         },
         "mapInt32Any": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -349,7 +400,8 @@
         },
         "mapInt32BoolWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -372,7 +424,9 @@
         },
         "mapInt32BytesWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -406,7 +460,20 @@
         },
         "mapInt32DoubleWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -417,7 +484,8 @@
         },
         "mapInt32Duration": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -470,7 +538,22 @@
         },
         "mapInt32FloatWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -494,7 +577,10 @@
         },
         "mapInt32Int32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -516,7 +602,8 @@
         },
         "mapInt32Int64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -527,7 +614,7 @@
         },
         "mapInt32ListValue": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -575,7 +662,8 @@
         },
         "mapInt32StringWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -586,7 +674,7 @@
         },
         "mapInt32Struct": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -597,7 +685,8 @@
         },
         "mapInt32Timestamp": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -621,7 +710,10 @@
         },
         "mapInt32Uint32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -644,7 +736,9 @@
         },
         "mapInt32Uint64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 2147483647,
@@ -654,9 +748,7 @@
           "type": "object"
         },
         "mapInt32Value": {
-          "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "additionalProperties": {},
           "propertyNames": {
             "maximum": 2147483647,
             "minimum": -2147483648,
@@ -666,7 +758,12 @@
         },
         "mapInt64Any": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "propertyNames": {
             "type": "integer"
@@ -684,7 +781,8 @@
         },
         "mapInt64BoolWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "propertyNames": {
             "type": "integer"
@@ -703,7 +801,9 @@
         },
         "mapInt64BytesWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "propertyNames": {
             "type": "integer"
@@ -733,7 +833,20 @@
         },
         "mapInt64DoubleWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "propertyNames": {
             "type": "integer"
@@ -742,7 +855,8 @@
         },
         "mapInt64Duration": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "propertyNames": {
             "type": "integer"
@@ -789,7 +903,22 @@
         },
         "mapInt64FloatWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "propertyNames": {
             "type": "integer"
@@ -809,7 +938,10 @@
         },
         "mapInt64Int32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "integer"
@@ -827,7 +959,8 @@
         },
         "mapInt64Int64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "propertyNames": {
             "type": "integer"
@@ -836,7 +969,7 @@
         },
         "mapInt64ListValue": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "propertyNames": {
             "type": "integer"
@@ -886,7 +1019,8 @@
         },
         "mapInt64StringWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "propertyNames": {
             "type": "integer"
@@ -895,7 +1029,7 @@
         },
         "mapInt64Struct": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "propertyNames": {
             "type": "integer"
@@ -904,7 +1038,8 @@
         },
         "mapInt64Timestamp": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "propertyNames": {
             "type": "integer"
@@ -924,7 +1059,10 @@
         },
         "mapInt64Uint32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "integer"
@@ -943,7 +1081,9 @@
         },
         "mapInt64Uint64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "integer"
@@ -951,9 +1091,7 @@
           "type": "object"
         },
         "mapInt64Value": {
-          "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "additionalProperties": {},
           "propertyNames": {
             "type": "integer"
           },
@@ -961,7 +1099,12 @@
         },
         "mapStringAny": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "propertyNames": {
             "type": "string"
@@ -979,7 +1122,8 @@
         },
         "mapStringBoolWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "propertyNames": {
             "type": "string"
@@ -998,7 +1142,9 @@
         },
         "mapStringBytesWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "propertyNames": {
             "type": "string"
@@ -1028,7 +1174,20 @@
         },
         "mapStringDoubleWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "propertyNames": {
             "type": "string"
@@ -1037,7 +1196,8 @@
         },
         "mapStringDuration": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "propertyNames": {
             "type": "string"
@@ -1084,7 +1244,22 @@
         },
         "mapStringFloatWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "propertyNames": {
             "type": "string"
@@ -1104,7 +1279,10 @@
         },
         "mapStringInt32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "string"
@@ -1122,7 +1300,8 @@
         },
         "mapStringInt64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "propertyNames": {
             "type": "string"
@@ -1131,7 +1310,7 @@
         },
         "mapStringListValue": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "propertyNames": {
             "type": "string"
@@ -1171,7 +1350,8 @@
         },
         "mapStringStringWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "propertyNames": {
             "type": "string"
@@ -1180,7 +1360,7 @@
         },
         "mapStringStruct": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "propertyNames": {
             "type": "string"
@@ -1189,7 +1369,8 @@
         },
         "mapStringTimestamp": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "propertyNames": {
             "type": "string"
@@ -1209,7 +1390,10 @@
         },
         "mapStringUint32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "string"
@@ -1228,7 +1412,9 @@
         },
         "mapStringUint64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "type": "string"
@@ -1236,9 +1422,7 @@
           "type": "object"
         },
         "mapStringValue": {
-          "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "additionalProperties": {},
           "propertyNames": {
             "type": "string"
           },
@@ -1246,7 +1430,12 @@
         },
         "mapUint32Any": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1268,7 +1457,8 @@
         },
         "mapUint32BoolWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1291,7 +1481,9 @@
         },
         "mapUint32BytesWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1325,7 +1517,20 @@
         },
         "mapUint32DoubleWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1336,7 +1541,8 @@
         },
         "mapUint32Duration": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1389,7 +1595,22 @@
         },
         "mapUint32FloatWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1413,7 +1634,10 @@
         },
         "mapUint32Int32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1435,7 +1659,8 @@
         },
         "mapUint32Int64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1446,7 +1671,7 @@
         },
         "mapUint32ListValue": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1494,7 +1719,8 @@
         },
         "mapUint32StringWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1505,7 +1731,7 @@
         },
         "mapUint32Struct": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1516,7 +1742,8 @@
         },
         "mapUint32Timestamp": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1540,7 +1767,10 @@
         },
         "mapUint32Uint32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1563,7 +1793,9 @@
         },
         "mapUint32Uint64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "maximum": 4294967295,
@@ -1573,9 +1805,7 @@
           "type": "object"
         },
         "mapUint32Value": {
-          "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "additionalProperties": {},
           "propertyNames": {
             "maximum": 4294967295,
             "minimum": 0,
@@ -1585,7 +1815,12 @@
         },
         "mapUint64Any": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1605,7 +1840,8 @@
         },
         "mapUint64BoolWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1626,7 +1862,9 @@
         },
         "mapUint64BytesWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1658,7 +1896,20 @@
         },
         "mapUint64DoubleWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "propertyNames": {
             "minimum": 0,
@@ -1668,7 +1919,8 @@
         },
         "mapUint64Duration": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1718,7 +1970,22 @@
         },
         "mapUint64FloatWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "propertyNames": {
             "minimum": 0,
@@ -1740,7 +2007,10 @@
         },
         "mapUint64Int32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1760,7 +2030,8 @@
         },
         "mapUint64Int64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1770,7 +2041,7 @@
         },
         "mapUint64ListValue": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1814,7 +2085,8 @@
         },
         "mapUint64StringWrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1824,7 +2096,7 @@
         },
         "mapUint64Struct": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1834,7 +2106,8 @@
         },
         "mapUint64Timestamp": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1856,7 +2129,10 @@
         },
         "mapUint64Uint32Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1877,7 +2153,9 @@
         },
         "mapUint64Uint64Wrapper": {
           "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "propertyNames": {
             "minimum": 0,
@@ -1886,9 +2164,7 @@
           "type": "object"
         },
         "mapUint64Value": {
-          "additionalProperties": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "additionalProperties": {},
           "propertyNames": {
             "minimum": 0,
             "type": "integer"
@@ -1912,7 +2188,12 @@
         "repeatedAny": {
           "description": "Repeated wellknown.",
           "items": {
-            "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json"
+            "properties": {
+              "@type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
           },
           "type": "array"
         },
@@ -1924,7 +2205,8 @@
         },
         "repeatedBoolWrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+            "description": "The bool value.",
+            "type": "boolean"
           },
           "type": "array"
         },
@@ -1937,7 +2219,9 @@
         },
         "repeatedBytesWrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+            "description": "The bytes value.",
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "type": "string"
           },
           "type": "array"
         },
@@ -1967,13 +2251,27 @@
         },
         "repeatedDoubleWrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The double value."
           },
           "type": "array"
         },
         "repeatedDuration": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+            "format": "duration",
+            "type": "string"
           },
           "type": "array"
         },
@@ -2014,7 +2312,22 @@
         },
         "repeatedFloatWrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+            "anyOf": [
+              {
+                "maximum": 3.4028234663852886e+38,
+                "minimum": -3.4028234663852886e+38,
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The float value."
           },
           "type": "array"
         },
@@ -2029,7 +2342,10 @@
         },
         "repeatedInt32Wrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+            "description": "The int32 value.",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
           },
           "type": "array"
         },
@@ -2041,7 +2357,8 @@
         },
         "repeatedInt64Wrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+            "description": "The int64 value.",
+            "type": "integer"
           },
           "type": "array"
         },
@@ -2053,7 +2370,7 @@
         },
         "repeatedListValue": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.ListValue.jsonschema.strict.json"
+            "type": "array"
           },
           "type": "array"
         },
@@ -2128,19 +2445,21 @@
         },
         "repeatedStringWrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+            "description": "The string value.",
+            "type": "string"
           },
           "type": "array"
         },
         "repeatedStruct": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+            "type": "object"
           },
           "type": "array"
         },
         "repeatedTimestamp": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+            "format": "date-time",
+            "type": "string"
           },
           "type": "array"
         },
@@ -2154,7 +2473,10 @@
         },
         "repeatedUint32Wrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+            "description": "The uint32 value.",
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           },
           "type": "array"
         },
@@ -2167,32 +2489,40 @@
         },
         "repeatedUint64Wrapper": {
           "items": {
-            "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+            "description": "The uint64 value.",
+            "minimum": 0,
+            "type": "integer"
           },
           "type": "array"
         },
         "repeatedValue": {
-          "items": {
-            "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-          },
+          "items": {},
           "type": "array"
         },
         "singleAny": {
-          "$ref": "#/$defs/google.protobuf.Any.jsonschema.strict.json",
-          "description": "Wellknown."
+          "description": "Wellknown.",
+          "properties": {
+            "@type": {
+              "type": "string"
+            }
+          },
+          "type": "object"
         },
         "singleBool": {
           "type": "boolean"
         },
         "singleBoolWrapper": {
-          "$ref": "#/$defs/google.protobuf.BoolValue.jsonschema.strict.json"
+          "description": "The bool value.",
+          "type": "boolean"
         },
         "singleBytes": {
           "pattern": "^[A-Za-z0-9+/]*={0,2}$",
           "type": "string"
         },
         "singleBytesWrapper": {
-          "$ref": "#/$defs/google.protobuf.BytesValue.jsonschema.strict.json"
+          "description": "The bytes value.",
+          "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+          "type": "string"
         },
         "singleDouble": {
           "anyOf": [
@@ -2210,10 +2540,24 @@
           ]
         },
         "singleDoubleWrapper": {
-          "$ref": "#/$defs/google.protobuf.DoubleValue.jsonschema.strict.json"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            }
+          ],
+          "description": "The double value."
         },
         "singleDuration": {
-          "$ref": "#/$defs/google.protobuf.Duration.jsonschema.strict.json"
+          "format": "duration",
+          "type": "string"
         },
         "singleFixed32": {
           "maximum": 4294967295,
@@ -2242,7 +2586,22 @@
           ]
         },
         "singleFloatWrapper": {
-          "$ref": "#/$defs/google.protobuf.FloatValue.jsonschema.strict.json"
+          "anyOf": [
+            {
+              "maximum": 3.4028234663852886e+38,
+              "minimum": -3.4028234663852886e+38,
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            }
+          ],
+          "description": "The float value."
         },
         "singleInt32": {
           "description": "Singular",
@@ -2251,13 +2610,17 @@
           "type": "integer"
         },
         "singleInt32Wrapper": {
-          "$ref": "#/$defs/google.protobuf.Int32Value.jsonschema.strict.json"
+          "description": "The int32 value.",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
         },
         "singleInt64": {
           "type": "integer"
         },
         "singleInt64Wrapper": {
-          "$ref": "#/$defs/google.protobuf.Int64Value.jsonschema.strict.json"
+          "description": "The int64 value.",
+          "type": "integer"
         },
         "singleNestedEnum": {
           "enum": [
@@ -2291,13 +2654,15 @@
           "type": "string"
         },
         "singleStringWrapper": {
-          "$ref": "#/$defs/google.protobuf.StringValue.jsonschema.strict.json"
+          "description": "The string value.",
+          "type": "string"
         },
         "singleStruct": {
-          "$ref": "#/$defs/google.protobuf.Struct.jsonschema.strict.json"
+          "type": "object"
         },
         "singleTimestamp": {
-          "$ref": "#/$defs/google.protobuf.Timestamp.jsonschema.strict.json"
+          "format": "date-time",
+          "type": "string"
         },
         "singleUint32": {
           "maximum": 4294967295,
@@ -2305,18 +2670,21 @@
           "type": "integer"
         },
         "singleUint32Wrapper": {
-          "$ref": "#/$defs/google.protobuf.UInt32Value.jsonschema.strict.json"
+          "description": "The uint32 value.",
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
         },
         "singleUint64": {
           "minimum": 0,
           "type": "integer"
         },
         "singleUint64Wrapper": {
-          "$ref": "#/$defs/google.protobuf.UInt64Value.jsonschema.strict.json"
+          "description": "The uint64 value.",
+          "minimum": 0,
+          "type": "integer"
         },
-        "singleValue": {
-          "$ref": "#/$defs/google.protobuf.Value.jsonschema.strict.json"
-        },
+        "singleValue": {},
         "standaloneEnum": {
           "enum": [
             "FOO",
@@ -2351,128 +2719,6 @@
       ],
       "title": "Test All Types",
       "type": "object"
-    },
-    "google.protobuf.Any.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "properties": {
-        "@type": {
-          "type": "string"
-        }
-      },
-      "title": "Any",
-      "type": "object"
-    },
-    "google.protobuf.BoolValue.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The bool value.",
-      "title": "Bool Value",
-      "type": "boolean"
-    },
-    "google.protobuf.BytesValue.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The bytes value.",
-      "pattern": "^[A-Za-z0-9+/]*={0,2}$",
-      "title": "Bytes Value",
-      "type": "string"
-    },
-    "google.protobuf.DoubleValue.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "anyOf": [
-        {
-          "type": "number"
-        },
-        {
-          "enum": [
-            "Infinity",
-            "-Infinity",
-            "NaN"
-          ],
-          "type": "string"
-        }
-      ],
-      "description": "The double value.",
-      "title": "Double Value"
-    },
-    "google.protobuf.Duration.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "format": "duration",
-      "title": "Duration",
-      "type": "string"
-    },
-    "google.protobuf.FloatValue.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "anyOf": [
-        {
-          "maximum": 3.4028234663852886e+38,
-          "minimum": -3.4028234663852886e+38,
-          "type": "number"
-        },
-        {
-          "enum": [
-            "Infinity",
-            "-Infinity",
-            "NaN"
-          ],
-          "type": "string"
-        }
-      ],
-      "description": "The float value.",
-      "title": "Float Value"
-    },
-    "google.protobuf.Int32Value.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The int32 value.",
-      "maximum": 2147483647,
-      "minimum": -2147483648,
-      "title": "Int32 Value",
-      "type": "integer"
-    },
-    "google.protobuf.Int64Value.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The int64 value.",
-      "title": "Int64 Value",
-      "type": "integer"
-    },
-    "google.protobuf.ListValue.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "title": "List Value",
-      "type": "array"
-    },
-    "google.protobuf.StringValue.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The string value.",
-      "title": "String Value",
-      "type": "string"
-    },
-    "google.protobuf.Struct.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "title": "Struct",
-      "type": "object"
-    },
-    "google.protobuf.Timestamp.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "format": "date-time",
-      "title": "Timestamp",
-      "type": "string"
-    },
-    "google.protobuf.UInt32Value.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The uint32 value.",
-      "maximum": 4294967295,
-      "minimum": 0,
-      "title": "U Int32 Value",
-      "type": "integer"
-    },
-    "google.protobuf.UInt64Value.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "description": "The uint64 value.",
-      "minimum": 0,
-      "title": "U Int64 Value",
-      "type": "integer"
-    },
-    "google.protobuf.Value.jsonschema.strict.json": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "title": "Value"
     }
   },
   "$id": "bufext.cel.expr.conformance.proto3.NestedTestAllTypes.jsonschema.strict.bundle.json",

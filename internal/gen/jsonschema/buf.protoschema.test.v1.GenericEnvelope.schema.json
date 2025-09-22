@@ -1,0 +1,22 @@
+{
+  "$id": "buf.protoschema.test.v1.GenericEnvelope.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Test message for Any without constraints (should use default behavior)",
+  "properties": {
+    "data": {
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "id": {
+      "default": "",
+      "type": "string"
+    }
+  },
+  "title": "Generic Envelope",
+  "type": "object"
+}

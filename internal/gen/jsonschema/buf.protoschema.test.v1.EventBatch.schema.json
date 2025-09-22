@@ -1,0 +1,26 @@
+{
+  "$id": "buf.protoschema.test.v1.EventBatch.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Test message for repeated Any field with constraints",
+  "properties": {
+    "events": {
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "buf.protoschema.test.v1.MessageA.schema.json"
+          },
+          {
+            "$ref": "buf.protoschema.test.v1.MessageB.schema.json"
+          },
+          {
+            "$ref": "buf.protoschema.test.v1.MessageC.schema.json"
+          }
+        ]
+      },
+      "type": "array"
+    }
+  },
+  "title": "Event Batch",
+  "type": "object"
+}

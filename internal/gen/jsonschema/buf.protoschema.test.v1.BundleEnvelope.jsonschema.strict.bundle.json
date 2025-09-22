@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.BundleEnvelope.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Test message for bundle generation with Any constraints",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.PayloadA.jsonschema.strict"
+            },
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.PayloadB.jsonschema.strict"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Bundle Envelope",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.PayloadA.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Test payload message types",
+      "properties": {
+        "code": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message",
+        "code"
+      ],
+      "title": "PayloadA",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.PayloadB.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "details": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "success",
+        "details"
+      ],
+      "title": "PayloadB",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.BundleEnvelope.jsonschema.strict.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.BundleEnvelope.jsonschema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

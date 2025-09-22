@@ -1,0 +1,25 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.PayloadB.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "details": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "success",
+        "details"
+      ],
+      "title": "PayloadB",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.PayloadB.jsonschema.strict.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.PayloadB.jsonschema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

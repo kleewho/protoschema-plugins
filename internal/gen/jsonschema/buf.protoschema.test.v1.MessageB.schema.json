@@ -1,0 +1,23 @@
+{
+  "$id": "buf.protoschema.test.v1.MessageB.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "patternProperties": {
+    "^(fieldB)$": {
+      "default": "",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "field_b": {
+      "default": "",
+      "type": "string"
+    },
+    "flag": {
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "title": "MessageB",
+  "type": "object"
+}

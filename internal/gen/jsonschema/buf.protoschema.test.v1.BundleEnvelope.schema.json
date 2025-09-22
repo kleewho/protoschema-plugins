@@ -1,0 +1,24 @@
+{
+  "$id": "buf.protoschema.test.v1.BundleEnvelope.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Test message for bundle generation with Any constraints",
+  "properties": {
+    "id": {
+      "default": "",
+      "type": "string"
+    },
+    "payload": {
+      "oneOf": [
+        {
+          "$ref": "buf.protoschema.test.v1.PayloadA.schema.json"
+        },
+        {
+          "$ref": "buf.protoschema.test.v1.PayloadB.schema.json"
+        }
+      ]
+    }
+  },
+  "title": "Bundle Envelope",
+  "type": "object"
+}

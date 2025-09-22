@@ -1,0 +1,28 @@
+{
+  "$id": "buf.protoschema.test.v1.PayloadA.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Test payload message types",
+  "properties": {
+    "code": {
+      "anyOf": [
+        {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        },
+        {
+          "pattern": "^-?[0-9]+$",
+          "type": "string"
+        }
+      ],
+      "default": 0
+    },
+    "message": {
+      "default": "",
+      "type": "string"
+    }
+  },
+  "title": "PayloadA",
+  "type": "object"
+}

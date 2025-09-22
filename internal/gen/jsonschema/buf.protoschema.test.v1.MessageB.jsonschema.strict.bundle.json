@@ -1,0 +1,25 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.MessageB.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "fieldB": {
+          "type": "string"
+        },
+        "flag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fieldB",
+        "flag"
+      ],
+      "title": "MessageB",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.MessageB.jsonschema.strict.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.MessageB.jsonschema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,24 @@
+{
+  "$id": "buf.protoschema.test.v1.EventEnvelope.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "Test message for single Any field with constraints",
+  "properties": {
+    "id": {
+      "default": "",
+      "type": "string"
+    },
+    "payload": {
+      "oneOf": [
+        {
+          "$ref": "buf.protoschema.test.v1.MessageA.schema.json"
+        },
+        {
+          "$ref": "buf.protoschema.test.v1.MessageB.schema.json"
+        }
+      ]
+    }
+  },
+  "title": "Event Envelope",
+  "type": "object"
+}
