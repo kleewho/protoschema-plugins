@@ -102,14 +102,28 @@ func WithBundle() GeneratorOption {
 	}
 }
 
+// WithExtensions sets the extension registry for the generator.
+func WithExtensions(registry ExtensionRegistry) GeneratorOption {
+	return func(p *Generator) {
+		p.extensions = registry
+	}
+}
+
 // Generator is a JSON schema generator for protobuf messages.
 type Generator struct {
 	schema               map[protoreflect.FullName]*msgSchema
 	custom               map[protoreflect.FullName]func(protoreflect.MessageDescriptor, *validate.FieldRules, map[string]any) error
+	extensions           ExtensionRegistry
 	useJSONNames         bool
 	additionalProperties bool
 	strict               bool
 	bundle               bool
+}
+
+// ExtensionRegistry interface for extension system
+type ExtensionRegistry interface {
+	GetSchemaOverride(fqn string) map[string]any
+	HasOverrides() bool
 }
 
 // NewGenerator creates a new JSON schema generator with the given options.
@@ -235,6 +249,19 @@ func (p *Generator) getRef(fdesc protoreflect.FieldDescriptor) string {
 func (p *Generator) generate(desc protoreflect.MessageDescriptor) (*msgSchema, error) {
 	if entry, ok := p.schema[desc.FullName()]; ok {
 		return entry, nil // Already generated.
+	}
+
+	// Check for schema override FIRST
+	if p.extensions != nil {
+		if overrideSchema := p.extensions.GetSchemaOverride(string(desc.FullName())); overrideSchema != nil {
+			entry := &msgSchema{
+				desc:   desc,
+				schema: overrideSchema, // Use override instead of generating
+				id:     p.getID(desc, false),
+			}
+			p.schema[desc.FullName()] = entry
+			return entry, nil
+		}
 	}
 
 	// Create a new entry for the message.

@@ -1,0 +1,20 @@
+# Test configuration to verify YAML loading works
+metadata:
+  generator: "test-jsonschema-generator"
+  version: "v1.0.0-test"
+  additional:
+    test_mode: true
+
+field_processors:
+  - name: "sensitive_data"
+    priority: 100
+    config:
+      additional_sensitive:
+        - "test_password"
+        - "test_secret"
+
+schema_processors:
+  - name: "metadata"
+    config:
+      custom_keys:
+        "x-test-config": "loaded_successfully"
