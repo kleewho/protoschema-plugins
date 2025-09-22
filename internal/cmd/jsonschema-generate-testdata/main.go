@@ -70,7 +70,7 @@ func run() error {
 	}
 	for _, testDesc := range testDescs {
 		for _, generator := range generators {
-			if err := generator.Add(testDesc, testDesc.ParentFile()); err != nil {
+			if err := generator.Add(testDesc); err != nil {
 				return err
 			}
 		}

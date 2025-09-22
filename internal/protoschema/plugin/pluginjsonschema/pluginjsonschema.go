@@ -57,7 +57,7 @@ func Handle(
 		for i := range fileDescriptor.Messages().Len() {
 			messageDescriptor := fileDescriptor.Messages().Get(i)
 			for _, gen := range gens {
-				if err := gen.Add(messageDescriptor, fileDescriptor); err != nil {
+				if err := gen.Add(messageDescriptor); err != nil {
 					return err
 				}
 			}

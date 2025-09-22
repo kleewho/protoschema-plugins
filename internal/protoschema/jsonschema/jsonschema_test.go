@@ -37,7 +37,7 @@ func TestJSONSchemaGolden(t *testing.T) {
 	require.NoError(t, err)
 	generator := NewGenerator()
 	for _, testDesc := range testDescs {
-		err = generator.Add(testDesc, testDesc.ParentFile())
+		err = generator.Add(testDesc)
 		require.NoError(t, err)
 	}
 
@@ -202,7 +202,7 @@ func TestCrossFileAnyConstraints(t *testing.T) {
 	generator := NewGenerator(WithBundle())
 
 	for _, testDesc := range testDescs {
-		err = generator.Add(testDesc, testDesc.ParentFile())
+		err = generator.Add(testDesc)
 		require.NoError(t, err)
 	}
 
@@ -319,7 +319,7 @@ func TestCrossFileAnyConstraints_Realistic(t *testing.T) {
 	require.NotNil(t, crossFileDesc, "CrossFileEventEnvelope descriptor not found")
 
 	// Add only the main message (not the external references)
-	err = generator.Add(crossFileDesc, crossFileDesc.ParentFile())
+	err = generator.Add(crossFileDesc)
 	require.NoError(t, err)
 
 	schemas := generator.Generate()
