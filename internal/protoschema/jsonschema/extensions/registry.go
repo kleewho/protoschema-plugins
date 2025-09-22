@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -30,40 +31,84 @@ type Registry struct {
 	resolver         *ReferenceResolver
 	processorMatcher *ProcessorMatcher
 	schemaProcessor  *SchemaProcessor
+	logger           *Logger
 }
 
 // NewRegistry creates a new extension registry
 func NewRegistry(config *Config) (*Registry, error) {
+	startTime := time.Now()
+	logger := GetGlobalLogger().With("registry")
+
+	logger.Debug("Creating new registry with %d overrides and %d processors",
+		len(config.SchemaOverrides), len(config.OptionProcessors))
+
 	registry := &Registry{
 		config:           config,
 		schemaOverrides:  make(map[string]*SchemaOverride),
 		optionProcessors: config.OptionProcessors,
 		processorMatcher: NewProcessorMatcher(),
 		schemaProcessor:  NewSchemaProcessor(),
+		logger:           logger,
 	}
 
 	// Copy schema overrides for faster lookup
+	logger.Debug("Copying %d schema overrides", len(config.SchemaOverrides))
 	for fqn, override := range config.SchemaOverrides {
 		overrideCopy := override // Create copy
 		registry.schemaOverrides[fqn] = &overrideCopy
+		logger.Trace("Added schema override: %s", fqn)
 	}
 
 	// Sort option processors by priority (higher priority first)
+	logger.Debug("Sorting %d option processors by priority", len(registry.optionProcessors))
 	sort.Slice(registry.optionProcessors, func(i, j int) bool {
 		return registry.optionProcessors[i].Priority > registry.optionProcessors[j].Priority
 	})
 
+	// Log processor order after sorting
+	for i, processor := range registry.optionProcessors {
+		logger.Trace("Processor %d: %s (priority=%d)", i, processor.Name, processor.Priority)
+	}
+
 	// Create and initialize reference resolver
+	resolverStart := time.Now()
+	logger.Debug("Creating reference resolver")
 	resolver, err := NewReferenceResolver(registry.schemaOverrides)
 	if err != nil {
+		logger.LogError("create_resolver", err, map[string]any{
+			"schema_count": len(registry.schemaOverrides),
+			"duration":     time.Since(startTime),
+		})
 		return nil, fmt.Errorf("failed to create reference resolver: %w", err)
 	}
 	registry.resolver = resolver
 
+	logger.LogPerformance("create_resolver", time.Since(resolverStart), map[string]any{
+		"schema_count": len(registry.schemaOverrides),
+	})
+
 	// Resolve all references at load time
+	resolveStart := time.Now()
+	logger.Debug("Resolving all references")
 	if err := registry.resolver.ResolveAll(); err != nil {
+		logger.LogError("resolve_references", err, map[string]any{
+			"schema_count": len(registry.schemaOverrides),
+			"duration":     time.Since(startTime),
+		})
 		return nil, fmt.Errorf("failed to resolve references: %w", err)
 	}
+
+	logger.LogPerformance("resolve_references", time.Since(resolveStart), map[string]any{
+		"schema_count": len(registry.schemaOverrides),
+	})
+
+	logger.LogPerformance("create_registry", time.Since(startTime), map[string]any{
+		"schema_overrides":  len(registry.schemaOverrides),
+		"option_processors": len(registry.optionProcessors),
+	})
+
+	logger.Info("Registry created successfully (overrides: %d, processors: %d)",
+		len(registry.schemaOverrides), len(registry.optionProcessors))
 
 	return registry, nil
 }
@@ -149,9 +194,39 @@ func (r *Registry) ApplyOptionProcessors(field protoreflect.FieldDescriptor, sch
 	return r.schemaProcessor.ApplyProcessors(schema, processors, fieldOptions)
 }
 
-// ProcessField is a convenience method that combines option processing
-func (r *Registry) ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) error {
-	return r.ApplyOptionProcessors(field, schema)
+// ProcessField processes field with option processors and returns processing results
+func (r *Registry) ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) (*FieldProcessingResult, error) {
+	startTime := time.Now()
+	fieldName := string(field.Name())
+
+	r.logger.Trace("Processing field: %s", fieldName)
+
+	result := &FieldProcessingResult{}
+
+	// Apply option processors with logging
+	err := r.ApplyOptionProcessors(field, schema)
+	if err != nil {
+		r.logger.LogError("apply_processors", err, map[string]any{
+			"field_name": fieldName,
+			"duration":   time.Since(startTime),
+		})
+		return nil, err
+	}
+
+	// Check if the field schema contains x-required marker
+	if requiredMarker, exists := schema["x-required"]; exists {
+		if isRequired, ok := requiredMarker.(bool); ok && isRequired {
+			result.RequiredField = true
+			r.logger.Debug("Field marked as required: %s", fieldName)
+			// Remove the x-required marker from the field schema since it's not standard JSON Schema
+			delete(schema, "x-required")
+		}
+	}
+
+	r.logger.Trace("Field processing complete: %s (required=%v, duration=%s)",
+		fieldName, result.RequiredField, time.Since(startTime))
+
+	return result, nil
 }
 
 // mergeSchemas merges source schema into target schema

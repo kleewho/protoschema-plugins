@@ -100,7 +100,7 @@ schema_overrides:
 	_, err := loader.LoadConfig()
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to parse YAML config")
+	assert.Contains(t, err.Error(), "Invalid YAML syntax in configuration file")
 }
 
 func TestConfigLoader_LoadConfig_UnsupportedVersion(t *testing.T) {
@@ -319,5 +319,5 @@ func TestConfigLoader_ReadError(t *testing.T) {
 	_, err = loader.LoadConfig()
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to read config file")
+	assert.Contains(t, err.Error(), "Cannot read configuration file")
 }

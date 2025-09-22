@@ -336,7 +336,7 @@ func (sp *SchemaProcessor) ApplyProcessors(fieldSchema map[string]interface{}, p
 	// Processors should already be sorted by priority (highest first)
 	for _, processor := range processors {
 		if err := sp.applyProcessor(fieldSchema, processor, fieldOptions); err != nil {
-			return fmt.Errorf("failed to apply processor %s: %w", processor.Name, err)
+			return NewProcessingError(processor.Name, "unknown", err.Error())
 		}
 	}
 	return nil
@@ -414,7 +414,7 @@ func (sp *SchemaProcessor) substituteTemplate(template string, fieldOptions map[
 		}
 		end := strings.Index(result[start:], "}")
 		if end == -1 {
-			return nil, fmt.Errorf("unterminated template variable in: %s", template)
+			return nil, NewTemplateError(template, "unterminated template variable", nil)
 		}
 		end += start
 
@@ -434,11 +434,16 @@ func (sp *SchemaProcessor) substituteTemplate(template string, fieldOptions map[
 				if value, exists := fieldOptions[fullKey]; exists {
 					replacement = fmt.Sprintf("%v", value)
 				} else {
-					return nil, fmt.Errorf("option %s not found in field options", varName)
+					// Get list of available options for suggestions
+					var availableOptions []string
+					for key := range fieldOptions {
+						availableOptions = append(availableOptions, key)
+					}
+					return nil, NewTemplateError(template, fmt.Sprintf("option '%s' not found", varName), availableOptions)
 				}
 			}
 		} else {
-			return nil, fmt.Errorf("unsupported template variable: %s", varName)
+			return nil, NewTemplateError(template, fmt.Sprintf("unsupported variable type: %s", varName), nil)
 		}
 
 		// Replace the template variable

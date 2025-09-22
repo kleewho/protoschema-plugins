@@ -337,6 +337,75 @@ func TestGenerator_WithExtensions_PriorityProcessing(t *testing.T) {
 	assert.Equal(t, "object", testSchema["type"])
 }
 
+func TestGenerator_WithExtensions_RequiredFieldProcessing(t *testing.T) {
+	// Test that x-required markers from option processors properly add fields to the message required array
+	config := &extensions.Config{
+		Version: "1.0",
+		SchemaOverrides: map[string]extensions.SchemaOverride{},
+		OptionProcessors: []extensions.OptionProcessor{
+			{
+				Name:     "required_fields",
+				Priority: 100,
+				Match: extensions.OptionMatch{
+					Option: "validator.field.required",
+					Value:  true,
+				},
+				Schema: map[string]any{
+					"x-required": true, // This should trigger addition to required array
+					"description": "Required field marked by option processor",
+				},
+			},
+		},
+	}
+
+	registry, err := extensions.NewRegistry(config)
+	require.NoError(t, err)
+
+	generator := NewGenerator(WithExtensions(registry))
+
+	// Create a message with a field that has validation options
+	// Since we're using mock descriptors, we'll simulate the behavior by directly
+	// testing that x-required is properly handled
+	testDesc := createMockMessageDescriptor(t, "test.RequiredFieldTest")
+
+	err = generator.Add(testDesc)
+	require.NoError(t, err)
+
+	schemas := generator.Generate()
+	testSchema, exists := schemas["test.RequiredFieldTest"]
+	require.True(t, exists)
+
+	// The schema should be an object
+	assert.Equal(t, "object", testSchema["type"])
+
+	// Since our mock descriptors don't have actual validator options,
+	// we need to test the x-required processing more directly.
+	// Let's create a more comprehensive test by directly testing the registry ProcessField method
+
+	// Test direct x-required processing
+	mockField := createMockFieldDescriptor(t, "test_field", descriptorpb.FieldDescriptorProto_TYPE_STRING)
+	fieldSchema := map[string]any{
+		"type": "string",
+	}
+
+	// Manually add x-required marker to simulate what an option processor would do
+	fieldSchema["x-required"] = true
+
+	processingResult, err := registry.ProcessField(mockField, fieldSchema)
+	require.NoError(t, err)
+	require.NotNil(t, processingResult)
+
+	// Verify that x-required was detected and will cause field to be required
+	assert.True(t, processingResult.RequiredField)
+
+	// Verify that x-required marker was removed from field schema (it's not standard JSON Schema)
+	_, hasXRequired := fieldSchema["x-required"]
+	assert.False(t, hasXRequired, "x-required marker should be removed from field schema")
+
+	// Verify other properties remain
+	assert.Equal(t, "string", fieldSchema["type"])
+}
+
 // Helper function to create a mock Timestamp descriptor
 func createMockTimestampDescriptor(t *testing.T) protoreflect.MessageDescriptor {
 	// Create a minimal descriptor for google.protobuf.Timestamp
@@ -412,4 +481,30 @@ func int32Ptr(i int32) *int32 {
 
 func typePtr(t descriptorpb.FieldDescriptorProto_Type) *descriptorpb.FieldDescriptorProto_Type {
 	return &t
+}
+
+// Helper function to create a mock field descriptor
+func createMockFieldDescriptor(t *testing.T, name string, fieldType descriptorpb.FieldDescriptorProto_Type) protoreflect.FieldDescriptor {
+	fileDesc := &descriptorpb.FileDescriptorProto{
+		Name:    stringPtr("test/mock.proto"),
+		Package: stringPtr("test"),
+		MessageType: []*descriptorpb.DescriptorProto{
+			{
+				Name: stringPtr("TestMessage"),
+				Field: []*descriptorpb.FieldDescriptorProto{
+					{
+						Name:   stringPtr(name),
+						Number: int32Ptr(1),
+						Type:   &fieldType,
+					},
+				},
+			},
+		},
+	}
+
+	file, err := protodesc.NewFile(fileDesc, nil)
+	require.NoError(t, err)
+
+	message := file.Messages().ByName("TestMessage")
+	return message.Fields().ByName(protoreflect.Name(name))
 }

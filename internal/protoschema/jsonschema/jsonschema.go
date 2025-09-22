@@ -24,6 +24,7 @@ import (
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"buf.build/go/protovalidate"
+	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -125,7 +126,7 @@ type ExtensionRegistry interface {
 	GetSchemaOverride(fqn string) map[string]any
 	HasOverrides() bool
 	HasOptionProcessors() bool
-	ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) error
+	ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) (*extensions.FieldProcessingResult, error)
 }
 
 // NewGenerator creates a new JSON schema generator with the given options.
@@ -318,6 +319,35 @@ func (p *Generator) generateMessage(entry *msgSchema) error {
 		if err != nil {
 			return fmt.Errorf("failed to generate field %q: %w", field.FullName(), err)
 		}
+
+		// Apply extension processing and check for additional required fields
+		if p.extensions != nil && p.extensions.HasOptionProcessors() {
+			processingResult, err := p.extensions.ProcessField(field, fieldSchema)
+			if err != nil {
+				return fmt.Errorf("failed to process field %s with option processors: %w", field.Name(), err)
+			}
+
+			// If the field was marked as required by option processors, add it to required array
+			if processingResult.RequiredField {
+				fieldName := string(field.Name())
+				if p.useJSONNames {
+					fieldName = field.JSONName()
+				}
+
+				// Check if it's already in the required array to avoid duplicates
+				alreadyRequired := false
+				for _, req := range required {
+					if req == fieldName {
+						alreadyRequired = true
+						break
+					}
+				}
+
+				if !alreadyRequired {
+					required = append(required, fieldName)
+				}
+			}
+		}
 		// Add the field schema to the properties.
 		aliases := p.addFieldProperties(field, visibility == FieldHide, fieldSchema, properties)
 		// Add any aliases to the pattern properties.
@@ -406,12 +436,7 @@ func (p *Generator) generateField(entry *msgSchema, field protoreflect.FieldDesc
 		return nil, err
 	}
 
-	// Apply option processors if extensions are available
-	if p.extensions != nil && p.extensions.HasOptionProcessors() {
-		if err := p.extensions.ProcessField(field, schema); err != nil {
-			return nil, fmt.Errorf("failed to process field %s with option processors: %w", field.Name(), err)
-		}
-	}
+	// Note: Option processing is now handled at the message level in generateMessage()
 
 	return schema, nil
 }
