@@ -26,6 +26,7 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"gopkg.in/yaml.v3"
 )
 
@@ -188,4 +189,238 @@ func TestGenerateConstrainedAnyValidation_EmptyConstraints(t *testing.T) {
 	typeProperty, ok := properties["@type"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, "string", typeProperty["type"])
+}
+
+func TestCrossFileAnyConstraints(t *testing.T) {
+	t.Parallel()
+
+	// Load test descriptors that include cross-file Any constraints
+	testDescs, err := golden.GetTestDescriptors("../../testdata")
+	require.NoError(t, err)
+
+	// Create generator in bundle mode to test cross-file reference consistency
+	generator := NewGenerator(WithBundle())
+
+	for _, testDesc := range testDescs {
+		err = generator.Add(testDesc)
+		require.NoError(t, err)
+	}
+
+	schemas := generator.Generate()
+
+	// Find the CrossFileEventEnvelope schema
+	var crossFileSchema map[string]any
+	for _, schema := range schemas {
+		if id, ok := schema["$id"].(string); ok && strings.Contains(id, "CrossFileEventEnvelope") {
+			crossFileSchema = schema
+			break
+		}
+	}
+
+	require.NotNil(t, crossFileSchema, "CrossFileEventEnvelope schema not found")
+
+	// Check that $defs contains all referenced message types
+	defs, ok := crossFileSchema["$defs"].(map[string]any)
+	require.True(t, ok, "Expected $defs section in bundle schema")
+
+	// Verify that external message schemas are included
+	// Note: The actual keys use .schema.json suffix, not .jsonschema.strict.json
+	expectedDefs := []string{
+		"buf.protoschema.test.v1.LocalMessage.schema.json",
+		"buf.protoschema.test.v1.ExternalMessageD.schema.json",
+		"buf.protoschema.test.v1.ExternalMessageE.schema.json",
+	}
+
+	for _, expectedDef := range expectedDefs {
+		_, exists := defs[expectedDef]
+		assert.True(t, exists, "Expected referenced schema %s to be included in $defs but it was missing", expectedDef)
+	}
+
+	// Check that the payload field has proper oneOf structure referencing all types
+	ref, ok := crossFileSchema["$ref"].(string)
+	require.True(t, ok)
+
+	mainSchemaKey := strings.TrimPrefix(ref, "#/$defs/")
+	mainSchema, ok := defs[mainSchemaKey].(map[string]any)
+	require.True(t, ok, "Main schema not found in $defs: %s", mainSchemaKey)
+
+	properties, ok := mainSchema["properties"].(map[string]any)
+	require.True(t, ok)
+
+	payloadProperty, ok := properties["payload"].(map[string]any)
+	require.True(t, ok, "payload property not found in main schema")
+
+	oneOfRaw, exists := payloadProperty["oneOf"]
+	require.True(t, exists, "oneOf field not found in payload property")
+
+	var oneOf []any
+	var oneOfOk bool
+
+	// Try different possible slice types
+	if oneOfSlice, ok2 := oneOfRaw.([]any); ok2 {
+		oneOf = oneOfSlice
+		oneOfOk = true
+	} else if oneOfSlice, ok2 := oneOfRaw.([]interface{}); ok2 {
+		oneOf = oneOfSlice
+		oneOfOk = true
+	} else if oneOfSlice, ok2 := oneOfRaw.([]map[string]interface{}); ok2 {
+		// Convert []map[string]interface{} to []any
+		oneOf = make([]any, len(oneOfSlice))
+		for i, item := range oneOfSlice {
+			oneOf[i] = item
+		}
+		oneOfOk = true
+	}
+	require.True(t, oneOfOk, "Expected payload field to have oneOf structure, got type %T", oneOfRaw)
+
+	// THIS IS THE MAIN ISSUE: References in oneOf should match the keys in $defs
+	// The bug is that references don't have .json suffix but the keys in $defs do
+	expectedRefs := []string{
+		"#/$defs/buf.protoschema.test.v1.LocalMessage.schema.json",
+		"#/$defs/buf.protoschema.test.v1.ExternalMessageD.schema.json",
+		"#/$defs/buf.protoschema.test.v1.ExternalMessageE.schema.json",
+	}
+
+	assert.Len(t, oneOf, len(expectedRefs), "Expected oneOf to have %d options", len(expectedRefs))
+
+	for i, refSchema := range oneOf {
+		refMap, ok := refSchema.(map[string]any)
+		require.True(t, ok)
+
+		actualRef, ok := refMap["$ref"].(string)
+		require.True(t, ok)
+
+		// Check if this reference actually exists in $defs
+		refKey := strings.TrimPrefix(actualRef, "#/$defs/")
+		_, refExists := defs[refKey]
+		assert.True(t, refExists, "Reference %s in oneOf[%d] points to non-existent definition in $defs", actualRef, i)
+	}
+}
+
+func TestCrossFileAnyConstraints_Realistic(t *testing.T) {
+	t.Parallel()
+
+	// Load all test descriptors to simulate having all FileDescriptors available
+	testDescs, err := golden.GetTestDescriptors("../../testdata")
+	require.NoError(t, err)
+
+	// Build a map of all descriptors by FullName for easy lookup
+	allDescs := make(map[protoreflect.FullName]protoreflect.MessageDescriptor)
+	var allFiles []protoreflect.FileDescriptor
+	fileSet := make(map[string]protoreflect.FileDescriptor)
+
+	for _, desc := range testDescs {
+		allDescs[desc.FullName()] = desc
+		// Collect unique file descriptors
+		if _, exists := fileSet[desc.ParentFile().Path()]; !exists {
+			fileSet[desc.ParentFile().Path()] = desc.ParentFile()
+			allFiles = append(allFiles, desc.ParentFile())
+		}
+	}
+
+	// Create generator in bundle mode
+	generator := NewGenerator(WithBundle())
+	generator.SetFileDescriptors(allFiles) // Provide all file descriptors for cross-file resolution
+
+	// Simulate real-world scenario: only add the main CrossFileEventEnvelope message
+	// (like how protoc would process only one file at a time)
+	var crossFileDesc protoreflect.MessageDescriptor
+	for _, desc := range testDescs {
+		if desc.FullName() == "buf.protoschema.test.v1.CrossFileEventEnvelope" {
+			crossFileDesc = desc
+			break
+		}
+	}
+	require.NotNil(t, crossFileDesc, "CrossFileEventEnvelope descriptor not found")
+
+	// Add only the main message (not the external references)
+	err = generator.Add(crossFileDesc)
+	require.NoError(t, err)
+
+	schemas := generator.Generate()
+
+	// Find the generated bundle
+	var crossFileSchema map[string]any
+	for _, schema := range schemas {
+		if id, ok := schema["$id"].(string); ok && strings.Contains(id, "CrossFileEventEnvelope") {
+			crossFileSchema = schema
+			break
+		}
+	}
+
+	require.NotNil(t, crossFileSchema, "CrossFileEventEnvelope schema not found")
+
+	// Check that $defs contains all referenced message types (including external ones)
+	defs, ok := crossFileSchema["$defs"].(map[string]any)
+	require.True(t, ok, "Expected $defs section in bundle schema")
+
+	// Verify that external message schemas are included
+	// These messages are from different proto files but should be discovered and included
+	expectedDefs := []string{
+		"buf.protoschema.test.v1.LocalMessage.schema.json",
+		"buf.protoschema.test.v1.ExternalMessageD.schema.json",
+		"buf.protoschema.test.v1.ExternalMessageE.schema.json",
+	}
+
+	for _, expectedDef := range expectedDefs {
+		_, exists := defs[expectedDef]
+		assert.True(t, exists, "Expected referenced schema %s to be included in $defs but it was missing", expectedDef)
+	}
+
+	// Verify the oneOf structure and that all references are valid
+	ref, ok := crossFileSchema["$ref"].(string)
+	require.True(t, ok)
+
+	mainSchemaKey := strings.TrimPrefix(ref, "#/$defs/")
+	mainSchema, ok := defs[mainSchemaKey].(map[string]any)
+	require.True(t, ok, "Main schema not found in $defs: %s", mainSchemaKey)
+
+	properties, ok := mainSchema["properties"].(map[string]any)
+	require.True(t, ok)
+
+	payloadProperty, ok := properties["payload"].(map[string]any)
+	require.True(t, ok, "payload property not found in main schema")
+
+	oneOfRaw, exists := payloadProperty["oneOf"]
+	require.True(t, exists, "oneOf field not found in payload property")
+
+	var oneOf []any
+	var oneOfOk bool
+
+	// Handle type conversion
+	if oneOfSlice, ok2 := oneOfRaw.([]any); ok2 {
+		oneOf = oneOfSlice
+		oneOfOk = true
+	} else if oneOfSlice, ok2 := oneOfRaw.([]interface{}); ok2 {
+		oneOf = oneOfSlice
+		oneOfOk = true
+	} else if oneOfSlice, ok2 := oneOfRaw.([]map[string]interface{}); ok2 {
+		oneOf = make([]any, len(oneOfSlice))
+		for i, item := range oneOfSlice {
+			oneOf[i] = item
+		}
+		oneOfOk = true
+	}
+	require.True(t, oneOfOk, "Expected payload field to have oneOf structure, got type %T", oneOfRaw)
+
+	expectedRefs := []string{
+		"#/$defs/buf.protoschema.test.v1.LocalMessage.schema.json",
+		"#/$defs/buf.protoschema.test.v1.ExternalMessageD.schema.json",
+		"#/$defs/buf.protoschema.test.v1.ExternalMessageE.schema.json",
+	}
+
+	assert.Len(t, oneOf, len(expectedRefs), "Expected oneOf to have %d options", len(expectedRefs))
+
+	for i, refSchema := range oneOf {
+		refMap, ok := refSchema.(map[string]any)
+		require.True(t, ok)
+
+		actualRef, ok := refMap["$ref"].(string)
+		require.True(t, ok)
+
+		// Check if this reference actually exists in $defs
+		refKey := strings.TrimPrefix(actualRef, "#/$defs/")
+		_, refExists := defs[refKey]
+		assert.True(t, refExists, "Reference %s in oneOf[%d] points to non-existent definition in $defs", actualRef, i)
+	}
 }

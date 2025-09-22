@@ -11,10 +11,10 @@
         "payload": {
           "oneOf": [
             {
-              "$ref": "#/$defs/buf.protoschema.test.v1.PayloadA.jsonschema.strict"
+              "$ref": "#/$defs/buf.protoschema.test.v1.PayloadA.jsonschema.strict.json"
             },
             {
-              "$ref": "#/$defs/buf.protoschema.test.v1.PayloadB.jsonschema.strict"
+              "$ref": "#/$defs/buf.protoschema.test.v1.PayloadB.jsonschema.strict.json"
             }
           ]
         }

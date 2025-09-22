@@ -1,0 +1,38 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.ExternalMessageD.jsonschema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "External message referenced from cross-file Any constraints",
+      "patternProperties": {
+        "^(field_d)$": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "fieldD": {
+          "default": "",
+          "type": "string"
+        },
+        "timestamp": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        }
+      },
+      "title": "External MessageD",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.ExternalMessageD.jsonschema.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.ExternalMessageD.jsonschema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

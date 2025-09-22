@@ -1,0 +1,5 @@
+syntax = "proto2";
+message ExternalMessageD {
+  optional string field_d = 1;
+  optional int64 timestamp = 2;
+}

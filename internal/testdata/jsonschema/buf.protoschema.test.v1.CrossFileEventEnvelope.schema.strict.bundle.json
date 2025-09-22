@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.CrossFileEventEnvelope.schema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Test message that references both local and external messages in Any constraints",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.LocalMessage.schema.strict.json"
+            },
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.ExternalMessageD.schema.strict.json"
+            },
+            {
+              "$ref": "#/$defs/buf.protoschema.test.v1.ExternalMessageE.schema.strict.json"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Cross File Event Envelope",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.ExternalMessageD.schema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "External message referenced from cross-file Any constraints",
+      "properties": {
+        "field_d": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "field_d",
+        "timestamp"
+      ],
+      "title": "External MessageD",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.ExternalMessageE.schema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Another external message for testing",
+      "properties": {
+        "field_e": {
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "field_e"
+      ],
+      "title": "External MessageE",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.LocalMessage.schema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Local message in the same file",
+      "properties": {
+        "local_field": {
+          "type": "string"
+        },
+        "local_flag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "local_field",
+        "local_flag"
+      ],
+      "title": "Local Message",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.CrossFileEventEnvelope.schema.strict.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.CrossFileEventEnvelope.schema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

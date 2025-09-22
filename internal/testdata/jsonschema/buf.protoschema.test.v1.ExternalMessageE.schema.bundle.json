@@ -1,0 +1,32 @@
+{
+  "$defs": {
+    "buf.protoschema.test.v1.ExternalMessageE.schema.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Another external message for testing",
+      "patternProperties": {
+        "^(fieldE)$": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "field_e": {
+          "default": "",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "title": "External MessageE",
+      "type": "object"
+    }
+  },
+  "$id": "buf.protoschema.test.v1.ExternalMessageE.schema.bundle.json",
+  "$ref": "#/$defs/buf.protoschema.test.v1.ExternalMessageE.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

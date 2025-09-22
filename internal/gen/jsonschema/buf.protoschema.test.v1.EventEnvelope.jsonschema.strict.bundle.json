@@ -11,10 +11,10 @@
         "payload": {
           "oneOf": [
             {
-              "$ref": "#/$defs/buf.protoschema.test.v1.MessageA.jsonschema.strict"
+              "$ref": "#/$defs/buf.protoschema.test.v1.MessageA.jsonschema.strict.json"
             },
             {
-              "$ref": "#/$defs/buf.protoschema.test.v1.MessageB.jsonschema.strict"
+              "$ref": "#/$defs/buf.protoschema.test.v1.MessageB.jsonschema.strict.json"
             }
           ]
         }
@@ -23,6 +23,45 @@
         "id"
       ],
       "title": "Event Envelope",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.MessageA.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Test payload message types",
+      "properties": {
+        "fieldA": {
+          "type": "string"
+        },
+        "number": {
+          "maximum": 2147483647,
+          "minimum": -2147483648,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fieldA",
+        "number"
+      ],
+      "title": "MessageA",
+      "type": "object"
+    },
+    "buf.protoschema.test.v1.MessageB.jsonschema.strict.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "fieldB": {
+          "type": "string"
+        },
+        "flag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fieldB",
+        "flag"
+      ],
+      "title": "MessageB",
       "type": "object"
     }
   },

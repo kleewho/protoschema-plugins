@@ -1,0 +1,32 @@
+{
+  "$id": "buf.protoschema.test.v1.ExternalMessageD.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "description": "External message referenced from cross-file Any constraints",
+  "patternProperties": {
+    "^(fieldD)$": {
+      "default": "",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "field_d": {
+      "default": "",
+      "type": "string"
+    },
+    "timestamp": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "pattern": "^-?[0-9]+$",
+          "type": "string"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "title": "External MessageD",
+  "type": "object"
+}

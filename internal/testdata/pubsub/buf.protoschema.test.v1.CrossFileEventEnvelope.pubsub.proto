@@ -1,0 +1,9 @@
+syntax = "proto2";
+message CrossFileEventEnvelope {
+  optional string id = 1;
+  optional Inline_google_protobuf_Any payload = 2;
+  message Inline_google_protobuf_Any {
+    optional string type_url = 1;
+    optional bytes value = 2;
+  }
+}

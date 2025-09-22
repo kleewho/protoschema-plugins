@@ -1,0 +1,20 @@
+{
+  "$id": "buf.protoschema.test.v1.ExternalMessageD.schema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "External message referenced from cross-file Any constraints",
+  "properties": {
+    "field_d": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "field_d",
+    "timestamp"
+  ],
+  "title": "External MessageD",
+  "type": "object"
+}

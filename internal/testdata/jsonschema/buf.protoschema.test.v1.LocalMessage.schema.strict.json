@@ -1,0 +1,20 @@
+{
+  "$id": "buf.protoschema.test.v1.LocalMessage.schema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Local message in the same file",
+  "properties": {
+    "local_field": {
+      "type": "string"
+    },
+    "local_flag": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "local_field",
+    "local_flag"
+  ],
+  "title": "Local Message",
+  "type": "object"
+}

@@ -1,0 +1,26 @@
+{
+  "$id": "buf.protoschema.test.v1.ExternalMessageE.jsonschema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Another external message for testing",
+  "patternProperties": {
+    "^(field_e)$": {
+      "default": "",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "fieldE": {
+      "default": "",
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "title": "External MessageE",
+  "type": "object"
+}

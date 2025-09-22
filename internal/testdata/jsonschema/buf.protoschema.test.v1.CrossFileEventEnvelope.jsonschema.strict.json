@@ -1,0 +1,29 @@
+{
+  "$id": "buf.protoschema.test.v1.CrossFileEventEnvelope.jsonschema.strict.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Test message that references both local and external messages in Any constraints",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "payload": {
+      "oneOf": [
+        {
+          "$ref": "buf.protoschema.test.v1.LocalMessage.jsonschema.strict.json"
+        },
+        {
+          "$ref": "buf.protoschema.test.v1.ExternalMessageD.jsonschema.strict.json"
+        },
+        {
+          "$ref": "buf.protoschema.test.v1.ExternalMessageE.jsonschema.strict.json"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "title": "Cross File Event Envelope",
+  "type": "object"
+}

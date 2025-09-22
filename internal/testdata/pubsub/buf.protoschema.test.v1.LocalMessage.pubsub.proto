@@ -1,0 +1,5 @@
+syntax = "proto2";
+message LocalMessage {
+  optional string local_field = 1;
+  optional bool local_flag = 2;
+}

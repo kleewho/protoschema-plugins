@@ -1,0 +1,5 @@
+syntax = "proto2";
+message ExternalMessageE {
+  optional string field_e = 1;
+  repeated string tags = 2;
+}
