@@ -92,14 +92,29 @@ See `.claude/EXTENSION_SYSTEM.md` for detailed documentation and examples.
 
 Example usage:
 ```bash
-# Build the extended plugin
-go build ./cmd/protoc-gen-jsonschema-extended
-
 # Use with YAML configuration (recommended)
-protoc --jsonschema-extended_out=config=config.yaml:. myfile.proto
+protoc --jsonschema_out=config=config.yaml:. myfile.proto
 
-# Use with built-in example processors
-protoc --jsonschema-extended_out=use_examples=true:. myfile.proto
+# Combine with other options
+protoc --jsonschema_out=config=config.yaml,target=json-strict:. myfile.proto
+```
+
+Example YAML configuration:
+```yaml
+schema_overrides:
+  "google.protobuf.Timestamp":
+    schema:
+      type: string
+      format: date-time
+      description: "RFC 3339 timestamp"
+
+option_processors:
+  - name: "string_constraints"
+    priority: 100
+    field_matchers:
+      - option_path: "buf.validate.field.string.const"
+        schema_updates:
+          const: "${option_value}"
 ```
 
 YAML configuration allows declarative extension setup without Go code. See `.claude/YAML_CONFIG_GUIDE.md` for complete configuration options.
