@@ -158,7 +158,7 @@ func TestGenerateConstrainedAnyValidation_NoConstraints(t *testing.T) {
 	schema := make(map[string]any)
 
 	// Test with nil rules
-	err := generator.generateConstrainedAnyValidation(nil, schema)
+	_, err := generator.generateConstrainedAnyValidation(nil, schema)
 	require.NoError(t, err)
 
 	// Should fall back to default Any behavior
@@ -178,7 +178,7 @@ func TestGenerateConstrainedAnyValidation_EmptyConstraints(t *testing.T) {
 	// Create field rules with nil any rules (simulates no constraints)
 	rules := &validate.FieldRules{}
 
-	err := generator.generateConstrainedAnyValidation(rules, schema)
+	_, err := generator.generateConstrainedAnyValidation(rules, schema)
 	require.NoError(t, err)
 
 	// Should fall back to default Any behavior

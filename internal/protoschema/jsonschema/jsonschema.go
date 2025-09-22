@@ -508,28 +508,21 @@ func (p *Generator) generateFieldValidation(entry *msgSchema, field protoreflect
 					return err
 				}
 
-				// For google.protobuf.Any with constraints, get the referenced FQNs and track them
+				// For google.protobuf.Any with constraints, extract and track referenced FQNs
 				if field.Message().FullName() == "google.protobuf.Any" {
-					if rules != nil && rules.GetAny() != nil && len(rules.GetAny().GetIn()) > 0 {
-						// Call the constrained Any validation directly to get the referenced FQNs
-						referencedFqns, err := p.generateConstrainedAnyValidation(rules, make(map[string]any))
-						if err != nil {
-							return err
-						}
-
-						// Add the referenced FQNs to entry.refs
-						for _, fqn := range referencedFqns {
-							if entry.refs == nil {
-								entry.refs = make(map[protoreflect.FullName]struct{})
-							}
-							entry.refs[fqn] = struct{}{}
-
-							// Ensure the referenced schema exists for bundling
-							if _, exists := p.schema[fqn]; !exists {
-								// Try to find and generate the schema for this message
-								p.ensureMessageSchema(fqn)
+					if tempFqns, exists := schema["_anyReferencedFqns"]; exists {
+						// Extract the referenced FQNs that were stored during schema generation
+						if referencedFqns, ok := tempFqns.([]protoreflect.FullName); ok {
+							// Add the referenced FQNs to entry.refs
+							for _, fqn := range referencedFqns {
+								if entry.refs == nil {
+									entry.refs = make(map[protoreflect.FullName]struct{})
+								}
+								entry.refs[fqn] = struct{}{}
 							}
 						}
+						// Clean up the temporary field so it doesn't appear in output
+						delete(schema, "_anyReferencedFqns")
 					}
 				}
 				return nil
@@ -1519,8 +1512,15 @@ func (p *Generator) makeWktGenerators() map[protoreflect.FullName]func(protorefl
 	result["google.protobuf.Any"] = func(_ protoreflect.MessageDescriptor, rules *validate.FieldRules, schema map[string]any) error {
 		// Check if there are any type constraints
 		if rules != nil && rules.GetAny() != nil && len(rules.GetAny().GetIn()) > 0 {
-			_, err := p.generateConstrainedAnyValidation(rules, schema)
-			return err
+			referencedFqns, err := p.generateConstrainedAnyValidation(rules, schema)
+			if err != nil {
+				return err
+			}
+			// Store referenced FQNs temporarily for reference tracking
+			if len(referencedFqns) > 0 {
+				schema["_anyReferencedFqns"] = referencedFqns
+			}
+			return nil
 		}
 		// Fallback to default Any behavior
 		schema["type"] = jsObject
@@ -1601,81 +1601,38 @@ func (p *Generator) generateConstrainedAnyValidation(rules *validate.FieldRules,
 
 	typeUrls := anyRules.GetIn()
 
-	// Parse type URLs and generate oneOf array
+	// Generate oneOf array with references to constrained message types
 	oneOfSchemas := make([]map[string]any, 0, len(typeUrls))
-	// Store referenced FQNs to return them for tracking
-	var referencedFqns []protoreflect.FullName
+	referencedFqns := make([]protoreflect.FullName, 0, len(typeUrls))
 
 	for _, typeUrl := range typeUrls {
-		// Parse type URL to get message FQN
+		// Parse type URL and create reference
 		messageFqn := p.parseTypeUrl(typeUrl)
-
-		// Create a reference to the message type using FQN
 		fullName := protoreflect.FullName(messageFqn)
 		referencedFqns = append(referencedFqns, fullName)
 
-		// Try to resolve and generate the message schema to ensure it's available
-		messageDesc := p.resolveMessageByFqn(messageFqn)
-		if messageDesc != nil {
-			// Generate the schema so it gets tracked
-			_, err := p.generate(messageDesc)
-			if err == nil {
-				// Schema generation successful, use proper reference
-				var ref string
-				if p.useJSONNames {
-					ref = string(fullName) + ".jsonschema"
-				} else {
-					ref = string(fullName) + ".schema"
-				}
-				if p.strict {
-					ref += ".strict"
-				}
-
-				// Handle bundle vs non-bundle reference format
-				if p.bundle {
-					// In bundle mode, use internal reference format (no .json extension)
-					ref = defsPrefix + ref
-				} else {
-					// In non-bundle mode, use external file reference format (.json extension)
-					ref += ".json"
-				}
-
-				oneOfSchemas = append(oneOfSchemas, map[string]any{
-					"$ref": ref,
-				})
-				continue
-			}
-		}
-
-		// Fallback: create reference without generating schema (for external schemas)
-		var ref string
+		// Build reference string based on generator configuration
+		ref := string(fullName)
 		if p.useJSONNames {
-			ref = string(fullName) + ".jsonschema"
+			ref += ".jsonschema"
 		} else {
-			ref = string(fullName) + ".schema"
+			ref += ".schema"
 		}
 		if p.strict {
 			ref += ".strict"
 		}
 
-		// Handle bundle vs non-bundle reference format
+		// Format reference for bundle or external file
 		if p.bundle {
-			// In bundle mode, use internal reference format (no .json extension)
 			ref = defsPrefix + ref
 		} else {
-			// In non-bundle mode, use external file reference format (.json extension)
 			ref += ".json"
 		}
 
-		oneOfSchemas = append(oneOfSchemas, map[string]any{
-			"$ref": ref,
-		})
+		oneOfSchemas = append(oneOfSchemas, map[string]any{"$ref": ref})
 	}
 
-	// Set oneOf in schema
 	schema["oneOf"] = oneOfSchemas
-
-	// Return the referenced FQNs so they can be tracked by the caller
 	return referencedFqns, nil
 }
 
@@ -1704,25 +1661,7 @@ func (p *Generator) parseTypeUrl(typeUrl string) string {
 	return typeUrl
 }
 
-// resolveMessageByFqn finds a message descriptor by its fully qualified name
-func (p *Generator) resolveMessageByFqn(fqn string) protoreflect.MessageDescriptor {
-	// Convert string to protoreflect.FullName for proper comparison
-	fullName := protoreflect.FullName(fqn)
 
-	// Search through all generated schemas first (for efficiency)
-	if existing, ok := p.schema[fullName]; ok {
-		return existing.desc
-	}
-
-	// For now, return nil if not found - the caller will handle this error
-	// In practice, the message should be processed by the generator before we need to reference it
-	return nil
-}
-
-// getRefForMessage generates a reference string for a message descriptor
-func (p *Generator) getRefForMessage(desc protoreflect.MessageDescriptor) string {
-	return p.getID(desc, false)
-}
 
 // extractFqnFromRef extracts the FQN from a reference string
 func (p *Generator) extractFqnFromRef(ref string) string {
@@ -1757,14 +1696,3 @@ func (p *Generator) extractFqnFromRef(ref string) string {
 	return ref
 }
 
-// ensureMessageSchema attempts to find and generate a schema for the given FQN
-// This is used to generate schemas for messages referenced in Any constraints
-func (p *Generator) ensureMessageSchema(fqn protoreflect.FullName) {
-	// Check if we have access to the files and can find this message
-	// This would require access to the file descriptors, which we don't have here
-	// For now, we rely on the fact that messages should already be processed
-	// if they're in the same package/file as the referencing message
-
-	// The bundle generation will work if the referenced messages are processed
-	// as part of the same generation run (which they should be for messages in the same file)
-}
