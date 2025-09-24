@@ -1,4 +1,4 @@
-module github.com/bufbuild/protoschema-plugins
+module github.com/kleewho/protoschema-plugins
 
 go 1.24.0
 
