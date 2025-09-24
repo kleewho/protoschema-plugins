@@ -15,7 +15,7 @@
 package pubsub
 
 import (
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/normalize"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/normalize"
 	"github.com/jhump/protoreflect/desc" //nolint:staticcheck
 	"github.com/jhump/protoreflect/desc/protoprint"
 	"google.golang.org/protobuf/proto"

@@ -17,8 +17,8 @@ package jsonschema
 import (
 	"testing"
 
-	testv1 "github.com/bufbuild/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
+	testv1 "github.com/kleewho/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/reflect/protoreflect"

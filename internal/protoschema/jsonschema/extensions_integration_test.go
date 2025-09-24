@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/reflect/protoreflect"

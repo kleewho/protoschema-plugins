@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/bufbuild/protoplugin"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/pubsub"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/pubsub"
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 

@@ -22,7 +22,7 @@ package testv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	proto3 "github.com/bufbuild/protoschema-plugins/internal/gen/proto/bufext/cel/expr/conformance/proto3"
+	proto3 "github.com/kleewho/protoschema-plugins/internal/gen/proto/bufext/cel/expr/conformance/proto3"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -265,7 +265,7 @@ const file_buf_protoschema_test_v1_test_cases_proto_rawDesc = "" +
 	"\vbytes_field\x18\x04 \x01(\fR\n" +
 	"bytesField\x12S\n" +
 	"\x10nested_reference\x18\x05 \x01(\v2(.buf.protoschema.test.v1.NestedReferenceR\x0fnestedReferenceB\x87\x02\n" +
-	"\x1bcom.buf.protoschema.test.v1B\x0eTestCasesProtoP\x01ZYgithub.com/bufbuild/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
+	"\x1bcom.buf.protoschema.test.v1B\x0eTestCasesProtoP\x01ZYgithub.com/kleewho/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
 
 var (
 	file_buf_protoschema_test_v1_test_cases_proto_rawDescOnce sync.Once

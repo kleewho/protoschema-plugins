@@ -21,9 +21,9 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/bufbuild/protoschema-plugins/internal/gen/proto/bufext/cel/expr/conformance/proto3"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/golden"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema"
+	_ "github.com/kleewho/protoschema-plugins/internal/gen/proto/bufext/cel/expr/conformance/proto3"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/golden"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 

@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/golden"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/golden"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

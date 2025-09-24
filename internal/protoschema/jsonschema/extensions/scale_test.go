@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	testv1 "github.com/bufbuild/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1"
+	testv1 "github.com/kleewho/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

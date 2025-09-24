@@ -209,7 +209,7 @@ const file_buf_protoschema_test_v1_bundle_test_proto_rawDesc = "" +
 	"\bPayloadB\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\adetails\x18\x02 \x01(\tR\adetailsB\x88\x02\n" +
-	"\x1bcom.buf.protoschema.test.v1B\x0fBundleTestProtoP\x01ZYgithub.com/bufbuild/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
+	"\x1bcom.buf.protoschema.test.v1B\x0fBundleTestProtoP\x01ZYgithub.com/kleewho/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
 
 var (
 	file_buf_protoschema_test_v1_bundle_test_proto_rawDescOnce sync.Once

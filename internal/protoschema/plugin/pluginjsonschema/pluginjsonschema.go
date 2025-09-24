@@ -23,8 +23,8 @@ import (
 	"strings"
 
 	"github.com/bufbuild/protoplugin"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 )

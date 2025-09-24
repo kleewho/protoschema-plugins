@@ -19,8 +19,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/golden"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/pubsub"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/golden"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/pubsub"
 )
 
 func main() {

@@ -152,7 +152,7 @@ const file_buf_protoschema_test_v1_external_messages_proto_rawDesc = "" +
 	"\x10ExternalMessageE\x12\x17\n" +
 	"\afield_e\x18\x01 \x01(\tR\x06fieldE\x12\x12\n" +
 	"\x04tags\x18\x02 \x03(\tR\x04tagsB\x8e\x02\n" +
-	"\x1bcom.buf.protoschema.test.v1B\x15ExternalMessagesProtoP\x01ZYgithub.com/bufbuild/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
+	"\x1bcom.buf.protoschema.test.v1B\x15ExternalMessagesProtoP\x01ZYgithub.com/kleewho/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
 
 var (
 	file_buf_protoschema_test_v1_external_messages_proto_rawDescOnce sync.Once

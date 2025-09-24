@@ -2951,7 +2951,7 @@ const file_bufext_cel_expr_conformance_proto3_test_all_types_proto_rawDesc = "" 
 	"\x03GOO\x10\x00\x12\a\n" +
 	"\x03GAR\x10\x01\x12\a\n" +
 	"\x03GAZ\x10\x02B\xcb\x02\n" +
-	"&com.bufext.cel.expr.conformance.proto3B\x11TestAllTypesProtoP\x01Z]github.com/bufbuild/protoschema-plugins/internal/gen/proto/bufext/cel/expr/conformance/proto3\xf8\x01\x01\xa2\x02\x05BCECP\xaa\x02\"Bufext.Cel.Expr.Conformance.Proto3\xca\x02\"Bufext\\Cel\\Expr\\Conformance\\Proto3\xe2\x02.Bufext\\Cel\\Expr\\Conformance\\Proto3\\GPBMetadata\xea\x02&Bufext::Cel::Expr::Conformance::Proto3b\x06proto3"
+	"&com.bufext.cel.expr.conformance.proto3B\x11TestAllTypesProtoP\x01Z]github.com/kleewho/protoschema-plugins/internal/gen/proto/bufext/cel/expr/conformance/proto3\xf8\x01\x01\xa2\x02\x05BCECP\xaa\x02\"Bufext.Cel.Expr.Conformance.Proto3\xca\x02\"Bufext\\Cel\\Expr\\Conformance\\Proto3\xe2\x02.Bufext\\Cel\\Expr\\Conformance\\Proto3\\GPBMetadata\xea\x02&Bufext::Cel::Expr::Conformance::Proto3b\x06proto3"
 
 var (
 	file_bufext_cel_expr_conformance_proto3_test_all_types_proto_rawDescOnce sync.Once

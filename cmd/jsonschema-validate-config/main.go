@@ -23,8 +23,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 )
 
 func main() {

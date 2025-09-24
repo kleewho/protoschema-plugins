@@ -24,7 +24,7 @@ import (
 
 	"buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	"buf.build/go/protovalidate"
-	"github.com/bufbuild/protoschema-plugins/internal/protoschema/jsonschema/extensions"
+	"github.com/kleewho/protoschema-plugins/internal/protoschema/jsonschema/extensions"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 

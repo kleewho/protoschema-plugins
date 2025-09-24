@@ -368,7 +368,7 @@ const file_buf_protoschema_test_v1_any_constraints_proto_rawDesc = "" +
 	"\bMessageC\x12\x17\n" +
 	"\afield_c\x18\x01 \x01(\tR\x06fieldC\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x01R\x05valueB\x8c\x02\n" +
-	"\x1bcom.buf.protoschema.test.v1B\x13AnyConstraintsProtoP\x01ZYgithub.com/bufbuild/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
+	"\x1bcom.buf.protoschema.test.v1B\x13AnyConstraintsProtoP\x01ZYgithub.com/kleewho/protoschema-plugins/internal/gen/proto/buf/protoschema/test/v1;testv1\xa2\x02\x03BPT\xaa\x02\x17Buf.Protoschema.Test.V1\xca\x02\x17Buf\\Protoschema\\Test\\V1\xe2\x02#Buf\\Protoschema\\Test\\V1\\GPBMetadata\xea\x02\x1aBuf::Protoschema::Test::V1b\x06proto3"
 
 var (
 	file_buf_protoschema_test_v1_any_constraints_proto_rawDescOnce sync.Once
