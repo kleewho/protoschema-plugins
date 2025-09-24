@@ -87,20 +87,8 @@ func NewRegistry(config *Config) (*Registry, error) {
 		"schema_count": len(registry.schemaOverrides),
 	})
 
-	// Resolve all references at load time
-	resolveStart := time.Now()
-	logger.Debug("Resolving all references")
-	if err := registry.resolver.ResolveAll(); err != nil {
-		logger.LogError("resolve_references", err, map[string]any{
-			"schema_count": len(registry.schemaOverrides),
-			"duration":     time.Since(startTime),
-		})
-		return nil, fmt.Errorf("failed to resolve references: %w", err)
-	}
-
-	logger.LogPerformance("resolve_references", time.Since(resolveStart), map[string]any{
-		"schema_count": len(registry.schemaOverrides),
-	})
+	// Note: Reference resolution is now deferred until we have generator context
+	logger.Debug("Reference resolution will be performed when generator context is available")
 
 	logger.LogPerformance("create_registry", time.Since(startTime), map[string]any{
 		"schema_overrides":  len(registry.schemaOverrides),
@@ -122,6 +110,18 @@ func LoadRegistry(configPath string) (*Registry, error) {
 	}
 
 	return NewRegistry(config)
+}
+
+// ResolveReferencesWithContext resolves all references using the provided generator context
+func (r *Registry) ResolveReferencesWithContext(bundle, strict, useJSONNames bool) error {
+	ctx := &GeneratorContext{
+		Bundle:       bundle,
+		Strict:       strict,
+		UseJSONNames: useJSONNames,
+	}
+
+	r.resolver.SetContext(ctx)
+	return r.resolver.ResolveAll()
 }
 
 // GetSchemaOverride returns schema override for given FQN, or nil if none exists

@@ -19,11 +19,19 @@ import (
 	"strings"
 )
 
+// GeneratorContext provides the context needed for proper reference generation
+type GeneratorContext struct {
+	Bundle       bool   // Bundle mode
+	Strict       bool   // Strict mode
+	UseJSONNames bool   // JSON vs proto naming
+}
+
 // ReferenceResolver handles @FQN reference resolution
 type ReferenceResolver struct {
 	schemas   map[string]*SchemaOverride
 	resolved  map[string]bool
 	resolving map[string]bool // For circular dependency detection
+	context   *GeneratorContext // Added for proper reference generation
 }
 
 // NewReferenceResolver creates a new reference resolver
@@ -33,6 +41,13 @@ func NewReferenceResolver(schemas map[string]*SchemaOverride) (*ReferenceResolve
 		resolved:  make(map[string]bool),
 		resolving: make(map[string]bool),
 	}, nil
+}
+
+// SetContext sets the generator context for proper reference generation
+func (r *ReferenceResolver) SetContext(ctx *GeneratorContext) {
+	r.context = ctx
+	// Reset resolved state when context changes
+	r.resolved = make(map[string]bool)
 }
 
 // ResolveAll resolves all @FQN references in schemas
@@ -142,14 +157,38 @@ func (r *ReferenceResolver) walkSchemaForReferences(obj any) error {
 
 // generateSchemaReference generates the appropriate reference for a target FQN
 func (r *ReferenceResolver) generateSchemaReference(targetFQN string) string {
-	// For MVP: use simple schema file reference
-	// This will need to be enhanced to handle different generator options:
-	// - Bundle vs non-bundle mode
-	// - JSON vs proto naming
-	// - Strict vs non-strict mode
+	if r.context == nil {
+		// Fallback to simple reference if no context is set
+		return targetFQN + ".schema.json"
+	}
 
-	// For now, use a simple .schema.json reference
-	return targetFQN + ".schema.json"
+	// Generate ID using the same logic as the main generator's getID() method
+	var result string
+
+	// In bundle mode, use #/$defs/ prefix
+	if r.context.Bundle {
+		result = "#/$defs/"
+	}
+
+	// Add the FQN
+	result += targetFQN
+
+	// Add naming convention suffix
+	if r.context.UseJSONNames {
+		result += ".jsonschema"
+	} else {
+		result += ".schema"
+	}
+
+	// Add strict suffix if in strict mode
+	if r.context.Strict {
+		result += ".strict"
+	}
+
+	// Add .json extension
+	result += ".json"
+
+	return result
 }
 
 // validateReferences validates that all references can be resolved

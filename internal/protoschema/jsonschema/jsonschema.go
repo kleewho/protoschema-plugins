@@ -115,6 +115,7 @@ type Generator struct {
 	schema               map[protoreflect.FullName]*msgSchema
 	custom               map[protoreflect.FullName]func(protoreflect.MessageDescriptor, *validate.FieldRules, map[string]any) error
 	extensions           ExtensionRegistry
+	extensionsResolved   bool // Track if extension references have been resolved
 	useJSONNames         bool
 	additionalProperties bool
 	strict               bool
@@ -127,6 +128,7 @@ type ExtensionRegistry interface {
 	HasOverrides() bool
 	HasOptionProcessors() bool
 	ProcessField(field protoreflect.FieldDescriptor, schema map[string]any) (*extensions.FieldProcessingResult, error)
+	ResolveReferencesWithContext(bundle, strict, useJSONNames bool) error
 }
 
 // NewGenerator creates a new JSON schema generator with the given options.
@@ -148,6 +150,18 @@ func (p *Generator) Add(desc protoreflect.MessageDescriptor) error {
 		return fmt.Errorf("failed to generate schema for %q: %w", desc.FullName(), err)
 	}
 	schema.added = true
+	return nil
+}
+
+// ensureExtensionsResolved ensures extension references are resolved with current generator context
+func (p *Generator) ensureExtensionsResolved() error {
+	if p.extensions != nil && !p.extensionsResolved {
+		err := p.extensions.ResolveReferencesWithContext(p.bundle, p.strict, p.useJSONNames)
+		if err != nil {
+			return fmt.Errorf("failed to resolve extension references: %w", err)
+		}
+		p.extensionsResolved = true
+	}
 	return nil
 }
 
@@ -234,22 +248,43 @@ func (p *Generator) bundleSchema(entry *msgSchema) map[string]any {
 func (p *Generator) bundleReferences(name protoreflect.FullName, defs map[string]any) {
 	entry, ok := p.schema[name]
 	if !ok {
-		// Try to find the message descriptor by searching through import chains of existing schemas
-		for _, existingEntry := range p.schema {
-			if msgDesc := p.findMessageDescriptorInImports(existingEntry.desc.ParentFile(), name); msgDesc != nil {
-				// Found it! Generate the schema
-				generatedSchema, err := p.generate(msgDesc)
-				if err != nil {
-					return // Failed to generate schema
+		// First try to find extension override
+		if p.extensions != nil {
+			if overrideSchema := p.extensions.GetSchemaOverride(string(name)); overrideSchema != nil {
+				// Create a virtual msgSchema entry from the extension override
+				generatedSchema := &msgSchema{
+					desc:   nil, // No protobuf descriptor for extension overrides
+					schema: overrideSchema,
+					id:     p.getIDFromFullName(name, false),
+					refs:   p.extractRefsFromSchema(overrideSchema),
+					added:  false,
 				}
-				// Add the generated schema to p.schema for future reference
 				p.schema[name] = generatedSchema
 				entry = generatedSchema
-				break
 			}
 		}
+
+		// If still not found, try to find the message descriptor by searching through import chains
 		if entry == nil {
-			return // Message descriptor not found in any import chain
+			for _, existingEntry := range p.schema {
+				if existingEntry.desc != nil { // Skip extension overrides without descriptors
+					if msgDesc := p.findMessageDescriptorInImports(existingEntry.desc.ParentFile(), name); msgDesc != nil {
+						// Found it! Generate the schema
+						generatedSchema, err := p.generate(msgDesc)
+						if err != nil {
+							return // Failed to generate schema
+						}
+						// Add the generated schema to p.schema for future reference
+						p.schema[name] = generatedSchema
+						entry = generatedSchema
+						break
+					}
+				}
+			}
+		}
+
+		if entry == nil {
+			return // Message descriptor not found in any import chain or extension overrides
 		}
 	}
 	// Add the reference.
@@ -281,14 +316,19 @@ type msgSchema struct {
 //
 // If bundleID is true, the ID for the bundle is returned.
 func (p *Generator) getID(desc protoreflect.Descriptor, bundleID bool) string {
+	return p.getIDFromFullName(desc.FullName(), bundleID)
+}
+
+// getIDFromFullName returns the ID for the given FullName.
+func (p *Generator) getIDFromFullName(fullName protoreflect.FullName, bundleID bool) string {
 	var result string
 	if !bundleID && p.bundle {
 		result = defsPrefix
 	}
 	if p.useJSONNames {
-		result += string(desc.FullName()) + ".jsonschema"
+		result += string(fullName) + ".jsonschema"
 	} else {
-		result += string(desc.FullName()) + ".schema"
+		result += string(fullName) + ".schema"
 	}
 	if p.strict {
 		result += ".strict"
@@ -297,6 +337,37 @@ func (p *Generator) getID(desc protoreflect.Descriptor, bundleID bool) string {
 		result += ".bundle"
 	}
 	return result + ".json"
+}
+
+// extractRefsFromSchema finds all $ref references in a schema and returns their FQNs
+func (p *Generator) extractRefsFromSchema(schema map[string]any) map[protoreflect.FullName]struct{} {
+	refs := make(map[protoreflect.FullName]struct{})
+	p.walkSchemaForRefs(schema, refs)
+	return refs
+}
+
+// walkSchemaForRefs recursively walks a schema to find $ref values
+func (p *Generator) walkSchemaForRefs(obj any, refs map[protoreflect.FullName]struct{}) {
+	switch v := obj.(type) {
+	case map[string]any:
+		for key, value := range v {
+			if key == "$ref" {
+				if refStr, ok := value.(string); ok {
+					// Extract FQN from reference (handle both bundle and non-bundle formats)
+					fqn := p.extractFqnFromRef(refStr)
+					if fqn != "" {
+						refs[protoreflect.FullName(fqn)] = struct{}{}
+					}
+				}
+			} else {
+				p.walkSchemaForRefs(value, refs)
+			}
+		}
+	case []any:
+		for _, item := range v {
+			p.walkSchemaForRefs(item, refs)
+		}
+	}
 }
 
 // getRef returns the reference ID for the given field descriptor.
@@ -315,11 +386,17 @@ func (p *Generator) generate(desc protoreflect.MessageDescriptor) (*msgSchema, e
 
 	// Check for schema override FIRST
 	if p.extensions != nil {
+		// Ensure references are resolved with current generator context
+		if err := p.ensureExtensionsResolved(); err != nil {
+			return nil, err
+		}
+
 		if overrideSchema := p.extensions.GetSchemaOverride(string(desc.FullName())); overrideSchema != nil {
 			entry := &msgSchema{
 				desc:   desc,
 				schema: overrideSchema, // Use override instead of generating
 				id:     p.getID(desc, false),
+				refs:   p.extractRefsFromSchema(overrideSchema), // Extract refs from resolved schema
 			}
 			// Automatically add $schema if not present
 			if _, exists := entry.schema["$schema"]; !exists {
@@ -1729,10 +1806,16 @@ func (p *Generator) extractFqnFromRef(ref string) string {
 		ref = strings.TrimPrefix(ref, defsPrefix)
 	}
 
-	// Remove extensions to get FQN
+	// Remove extensions to get FQN (check longest suffixes first)
 	if p.useJSONNames {
+		if strings.HasSuffix(ref, ".jsonschema.strict.json") {
+			return strings.TrimSuffix(ref, ".jsonschema.strict.json")
+		}
 		if strings.HasSuffix(ref, ".jsonschema.strict") {
 			return strings.TrimSuffix(ref, ".jsonschema.strict")
+		}
+		if strings.HasSuffix(ref, ".jsonschema.json") {
+			return strings.TrimSuffix(ref, ".jsonschema.json")
 		}
 		if strings.HasSuffix(ref, ".jsonschema") {
 			return strings.TrimSuffix(ref, ".jsonschema")
